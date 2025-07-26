@@ -97,26 +97,23 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       
       img.onerror = (errorEvent) => {
         clearTimeout(timeoutId);
-        
-        // Test URL accessibility with fetch to get more detailed error info
-        fetch(photoUrl, { method: 'HEAD', mode: 'no-cors' })
-          .then(() => {
-            console.error('FramePreview: Image accessible but failed to load as image:', photoUrl);
-            setImageError('Image format may not be supported');
-            setDebugInfo('Image accessible but format not supported');
-          })
-          .catch((fetchError) => {
-            console.error('FramePreview: Image not accessible:', photoUrl, fetchError);
-            setImageError('Image URL not accessible');
-            setDebugInfo(`Network error: ${fetchError.message || 'URL not accessible'}`);
-          });
-        
         setImageLoaded(false);
-        console.error('FramePreview: Image load error details:', {
+        
+        console.error('FramePreview: Image load error for URL:', photoUrl);
+        console.error('FramePreview: Error event details:', {
           url: photoUrl,
           errorType: errorEvent instanceof Event ? errorEvent.type : 'unknown',
-          errorMessage: errorEvent instanceof ErrorEvent ? errorEvent.message : 'Image load failed'
+          message: errorEvent instanceof ErrorEvent ? errorEvent.message : 'Image load failed'
         });
+        
+        // Check if it's a CORS or network issue
+        if (photoUrl.includes('supabase')) {
+          setImageError('Supabase storage access issue - check bucket permissions');
+          setDebugInfo('Storage bucket may not be public or URL is incorrect');
+        } else {
+          setImageError('Failed to load image');
+          setDebugInfo('Image URL may be invalid or inaccessible');
+        }
       };
       
       // Simply set the source - Supabase storage URLs should work without CORS issues
