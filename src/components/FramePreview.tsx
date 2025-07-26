@@ -52,6 +52,15 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     setDebugInfo(`Loading image: ${photoUrl ? 'URL provided' : 'No URL'}`);
     
     if (photoUrl) {
+      console.log('FramePreview: Photo URL details:', {
+        url: photoUrl,
+        length: photoUrl.length,
+        isSupabase: photoUrl.includes('supabase'),
+        hasProtocol: photoUrl.startsWith('http')
+      });
+    }
+    
+    if (photoUrl) {
       setImageError(null);
       setImageLoaded(false);
       
@@ -65,7 +74,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         setImageError('Image loading timeout');
         setDebugInfo('Loading timeout - image took too long to load');
         setImageLoaded(false);
-      }, 10000); // 10 second timeout
+      }, 30000); // 30 second timeout for large images
       
       img.onload = () => {
         clearTimeout(timeoutId);
@@ -85,9 +94,10 @@ const FramePreview: React.FC<FramePreviewProps> = ({
           
           const scaleX = frameArea.width / img.width;
           const scaleY = frameArea.height / img.height;
-          const scale = Math.min(scaleX, scaleY, 1); // Don't upscale beyond original size
+          // Allow scaling up to fit the frame, but cap at 2x to prevent excessive upscaling
+          const scale = Math.min(scaleX, scaleY, 2);
           
-          console.log('FramePreview: Auto-fitting image with scale:', scale);
+          console.log('FramePreview: Auto-fitting image with scale:', scale, 'frameArea:', frameArea, 'imgSize:', img.width, 'x', img.height);
           setPhotoPosition(prev => ({
             ...prev,
             scale
@@ -116,7 +126,10 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         }
       };
       
-      // Simply set the source - Supabase storage URLs should work without CORS issues
+      // Set crossOrigin for Supabase URLs to avoid CORS issues
+      if (photoUrl.includes('supabase')) {
+        img.crossOrigin = 'anonymous';
+      }
       img.src = photoUrl;
       
     } else {
@@ -133,7 +146,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    console.log('FramePreview: Drawing canvas', { imageLoaded, frameColor, frameWidth });
+    console.log('FramePreview: Drawing canvas', { imageLoaded, frameColor, frameWidth, canvasWidth, canvasHeight });
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -143,13 +156,15 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     const photoArea = {
       x: totalFrameWidth,
       y: totalFrameWidth,
-      width: canvas.width - totalFrameWidth * 2,
-      height: canvas.height - totalFrameWidth * 2
+      width: Math.max(canvas.width - totalFrameWidth * 2, 50), // Minimum 50px width
+      height: Math.max(canvas.height - totalFrameWidth * 2, 50) // Minimum 50px height
     };
+    
+    console.log('FramePreview: Canvas dimensions:', { width: canvas.width, height: canvas.height, totalFrameWidth, photoArea });
 
     // Draw photo if loaded
     if (imageLoaded && imageRef.current) {
-      console.log('FramePreview: Drawing image with position:', photoPosition);
+      console.log('FramePreview: Drawing image with position:', photoPosition, 'photoArea:', photoArea);
       ctx.save();
       
       // Clip to photo area
@@ -166,6 +181,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       ctx.scale(photoPosition.scale, photoPosition.scale);
       
       const img = imageRef.current;
+      console.log('FramePreview: Drawing image at center:', centerX, centerY, 'with scale:', photoPosition.scale, 'img size:', img.width, 'x', img.height);
       ctx.drawImage(img, -img.width / 2, -img.height / 2);
       
       ctx.restore();
