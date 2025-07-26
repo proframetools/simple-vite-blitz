@@ -1,0 +1,241 @@
+Executive Summary
+FrameCraft MVP is a streamlined photoframe showcase and ordering website for an Indian custom frame business. The platform focuses on product display, basic customization, and WhatsApp-based order processing to maximize business value within development constraints.
+Currency: All prices in Indian Rupees (₹)
+Target Market: Indian customers (primarily individual buyers)
+Order Processing: WhatsApp integration for seamless customer communication
+MVP Success Metrics
+
+Customer Engagement: 100+ product views per week
+WhatsApp Conversions: 10+ inquiries per week via WhatsApp
+Average Order Value: ₹2,500 per transaction
+Customer Satisfaction: 4.0+ rating
+Page Load Speed: <3 seconds on mobile
+
+Core MVP User Stories (Priority Order)
+Epic 1: Product Showcase (HIGH PRIORITY)
+
+As a customer, I want to see photoframes with clear images and prices in ₹ so that I can browse available options
+As a mobile user, I want the catalog to work smoothly on my phone so that I can browse anywhere
+As a customer, I want to filter frames by occasion (Wedding, Baby, Anniversary) so that I can find appropriate frames quickly
+As a customer, I want to see frame details (size, material, price in ₹) so that I can make informed decisions
+
+Epic 2: Basic Customization & Inquiry (HIGH PRIORITY)
+
+As a customer, I want to upload my photo (up to 50MB) to see a basic preview so that I can visualize my order
+As a customer, I want to select frame size (including custom dimensions) and orientation (portrait/landscape) so that I can customize my order perfectly
+As a customer, I want to select frame material so that I can choose the best option for my needs
+As a customer, I want to see the total price in ₹ as I make selections so that I know the cost upfront
+As a customer, I want to contact via WhatsApp with my selections so that I can place my order easily
+
+Epic 3: WhatsApp Integration (HIGH PRIORITY)
+
+As a customer, I want to send my frame selection and photo to WhatsApp so that I can place my order directly
+As a business owner, I want to receive structured order details via WhatsApp so that I can process orders efficiently
+As a customer, I want to continue the conversation on WhatsApp so that I can ask questions and track my order
+
+Epic 4: Admin Management (HIGH PRIORITY)
+
+As an admin, I want to add/edit/delete products so that I can manage the catalog
+As an admin, I want to update product prices in ₹ so that I can maintain current pricing
+As an admin, I want to view WhatsApp orders and inquiries so that I can manage customer requests
+As an admin, I want to track order status so that I can provide updates to customers
+As a customer, I want to send my frame selection and photo to WhatsApp so that I can place my order directly
+As a business owner, I want to receive structured order details via WhatsApp so that I can process orders efficiently
+As a customer, I want to continue the conversation on WhatsApp so that I can ask questions and track my order
+
+MVP Features & Requirements
+1. Product Catalog
+Must Have:
+
+Homepage product carousel showcasing featured frames
+Product grid layout with frame images
+Product detail pages with specifications and pricing in ₹
+Simple filtering by occasion categories (Wedding, Baby, Anniversary, General)
+
+Specifications:
+
+Product carousel with 5-8 featured frames on homepage
+Display 20-30 frame options maximum in catalog
+Clear product images (front view only)
+Price range: ₹500 - ₹5,000
+Basic responsive design for mobile
+
+2. Simple Customization System
+Must Have:
+
+Photo upload with basic preview overlay
+Custom size input (width × height in inches/cm)
+Orientation selection (Portrait/Landscape)
+Standard size selection (3-4 common sizes) with price updates
+Material selection (Wood, Metal, Plastic) with price calculation
+
+Specifications:
+
+Photo upload: JPEG/PNG, max 50MB per image
+Standard sizes: 8x10, 10x12, 12x16, 16x20 inches
+Custom size input with real-time price calculation
+Orientation toggle with preview update
+Real-time price calculation in ₹
+Simple overlay preview (no advanced positioning)
+
+3. WhatsApp Order Integration
+Must Have:
+
+WhatsApp contact button with pre-filled message
+Order summary generation for WhatsApp
+Business contact information and WhatsApp number integration
+
+Specifications:
+
+WhatsApp Business API integration
+Pre-formatted message with frame details, size, material, orientation, and total price
+Customer photo attachment capability (up to 50MB)
+Business WhatsApp number: +91-XXXXXXXXXX
+
+4. Admin Panel
+Must Have:
+
+Product management (Add/Edit/Delete products)
+Price management with ₹ updates
+Order management dashboard
+WhatsApp inquiry tracking
+Order status updates
+
+Specifications:
+
+Simple admin login system
+Product CRUD operations
+Bulk price updates
+Order tracking and status management
+Customer inquiry management from WhatsApp
+
+5. Business Information Pages
+Must Have:
+
+About Us page with business details and location
+Contact page with address, phone, WhatsApp, and business hours
+
+Specifications:
+
+Business address in India
+Contact details with Indian phone numbers
+Operating hours in IST
+Google Maps integration (if possible)
+
+6. Mobile Optimization & Performance
+Must Have:
+
+Mobile-responsive design optimization
+Image optimization and loading performance
+
+Specifications:
+
+Mobile-first approach
+Fast loading on 3G/4G networks
+Touch-friendly interface
+Compressed images with lazy loading
+
+6. Additional Features
+Nice to Have:
+
+Basic analytics tracking and customer inquiry form
+
+Technical Specifications for Lovable.ai
+Design Requirements
+
+Color Scheme: White and blue theme throughout the website
+Typography: Clean, readable fonts that work well in English and Hindi
+Images: Optimized for Indian internet speeds
+Currency: All prices displayed as ₹X,XXX format
+
+WhatsApp Integration Details
+WhatsApp Message Template:
+"Hi FrameCraft! I'm interested in ordering:
+- Frame: [Frame Name]
+- Size: [Selected Size] or Custom: [Width x Height]
+- Orientation: [Portrait/Landscape]
+- Material: [Selected Material]
+- Total Price: ₹[Calculated Price]
+- Photo attached: [Yes/No] (up to 50MB)
+
+Please confirm availability and delivery time to [City], [State]."
+Mobile-First Considerations
+
+Touch targets minimum 44px
+Optimized for portrait orientation
+WhatsApp button easily accessible
+Fast loading on slower networks common in India
+
+Development Strategy (15 Development Sessions)
+Phase 1: Foundation (Sessions 1-6)
+
+Homepage with Product Carousel - Featured frames carousel and navigation
+Product Catalog - Grid layout with filtering
+Product Detail Pages - Individual frame information and specifications
+Photo Upload System - 50MB upload capability with preview
+Size & Orientation Selection - Standard sizes, custom input, and portrait/landscape toggle
+Material Selection & Pricing - Real-time price calculation in ₹
+
+Phase 2: Integration & Admin (Sessions 7-12)
+
+WhatsApp Integration - Contact buttons and message generation
+Order Summary System - Structured order details for WhatsApp
+Admin Login & Authentication - Secure admin access
+Product Management Panel - Add/edit/delete products interface
+Order Management Dashboard - Track WhatsApp inquiries and orders
+Price Management System - Update pricing and manage inventory
+
+Phase 3: Optimization & Polish (Sessions 13-15)
+
+Mobile Optimization - Responsive design and performance tuning
+Business Pages - About Us, Contact, and company information
+Analytics & Final Polish - Tracking setup and UI refinements
+
+Success Criteria for MVP Launch
+Functional Requirements
+
+Homepage carousel showcasing featured frames
+All 30 frames displayed with correct pricing in ₹
+Photo upload works on mobile devices (up to 50MB)
+Custom size input and orientation selection functional
+WhatsApp integration sends properly formatted messages with attachments
+Admin panel allows product and order management
+Site loads in <3 seconds on mobile
+Responsive design works on common Indian phone models
+
+Business Goals (First Month)
+
+50+ unique visitors per week
+5+ WhatsApp inquiries per week
+1-2 completed orders per week
+Average inquiry-to-order conversion: 20%
+
+Post-MVP Enhancements (Future Scope)
+
+Payment gateway integration (Razorpay/Paytm)
+Advanced photo editing preview
+Customer testimonials section
+Bulk order functionality
+Multi-language support (Hindi)
+Express delivery options for major Indian cities
+
+Risk Mitigation for Limited Credits
+Critical Success Factors
+
+Prioritize WhatsApp Integration - Essential for Indian market
+Mobile-First Design - Most users will access via mobile
+Simple UX - Avoid complex features that consume credits
+Fast Loading - Crucial for Indian internet speeds
+Clear Pricing - Transparent ₹ pricing builds trust
+
+Lovable.ai Optimization Tips
+
+Use built-in components to maximize development efficiency
+Leverage existing templates where possible
+Focus on essential features for business impact
+Combine related features in single development sessions
+Use external services (WhatsApp) to reduce development complexity
+Prioritize mobile-responsive design from the start
+
+Conclusion
+This MVP focuses on the core business need: showcasing photoframes and converting visitors into WhatsApp inquiries. By prioritizing essential features and leveraging WhatsApp for order processing, FrameCraft can establish an online presence and start generating orders within the 15-credit constraint while building a foundation for future enhancements.
