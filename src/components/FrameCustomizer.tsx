@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { formatPrice } from '@/lib/currency';
 import PhotoUpload from './PhotoUpload';
 import FramePreview from './FramePreview';
+import ImageDebugTest from './ImageDebugTest';
 import { ShoppingCart, Heart, Star, Zap } from 'lucide-react';
 
 interface Product {
@@ -513,7 +514,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
               <FramePreview
                 photoUrl={uploadedPhoto?.url}
                 frameColor={selectedColor?.hex_code || '#8B4513'}
-                frameWidth={selectedThickness?.width_inches ? selectedThickness.width_inches * 10 : 20}
+                frameWidth={selectedThickness?.width_inches ? Math.min(selectedThickness.width_inches * 5, 30) : 15}
                 mattingColor={selectedMatting?.color_hex}
                 mattingThickness={selectedMatting?.thickness_inches ? selectedMatting.thickness_inches * 100 : 0}
                 canvasWidth={400}
@@ -531,6 +532,13 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                   </p>
                 )}
               </div>
+              
+              {/* Debug component */}
+              {uploadedPhoto && (
+                <div className="mt-4">
+                  <ImageDebugTest photoUrl={uploadedPhoto.url} />
+                </div>
+              )}
             </CardContent>
           </Card>
 
