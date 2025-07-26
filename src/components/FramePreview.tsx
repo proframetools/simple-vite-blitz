@@ -87,17 +87,19 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         // Auto-fit image to frame
         const canvas = canvasRef.current;
         if (canvas) {
+          const totalFrameWidth = frameWidth + mattingThickness;
           const frameArea = {
-            width: canvas.width - (frameWidth + mattingThickness) * 2,
-            height: canvas.height - (frameWidth + mattingThickness) * 2
+            width: Math.max(canvas.width - totalFrameWidth * 2, 50),
+            height: Math.max(canvas.height - totalFrameWidth * 2, 50)
           };
           
           const scaleX = frameArea.width / img.width;
           const scaleY = frameArea.height / img.height;
           // Allow scaling up to fit the frame, but cap at 2x to prevent excessive upscaling
-          const scale = Math.min(scaleX, scaleY, 2);
+          // Also ensure minimum scale of 0.1 (10%) so image is always visible
+          const scale = Math.max(Math.min(scaleX, scaleY, 2), 0.1);
           
-          console.log('FramePreview: Auto-fitting image with scale:', scale, 'frameArea:', frameArea, 'imgSize:', img.width, 'x', img.height);
+          console.log('FramePreview: Auto-fitting image with scale:', scale, 'frameArea:', frameArea, 'imgSize:', img.width, 'x', img.height, 'scaleX:', scaleX, 'scaleY:', scaleY);
           setPhotoPosition(prev => ({
             ...prev,
             scale
@@ -162,7 +164,37 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     
     console.log('FramePreview: Canvas dimensions:', { width: canvas.width, height: canvas.height, totalFrameWidth, photoArea });
 
-    // Draw photo if loaded
+    // Draw frame first (background)
+    ctx.fillStyle = frameColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Cut out inner area for photo
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    const innerArea = mattingColor ? 
+      { x: frameWidth, y: frameWidth, width: canvas.width - frameWidth * 2, height: canvas.height - frameWidth * 2 } :
+      photoArea;
+    ctx.fillRect(innerArea.x, innerArea.y, innerArea.width, innerArea.height);
+    ctx.restore();
+
+    // Draw matting if present
+    if (mattingColor && mattingThickness > 0) {
+      ctx.fillStyle = mattingColor;
+      
+      // Outer matting rectangle
+      ctx.fillRect(frameWidth, frameWidth, 
+        canvas.width - frameWidth * 2, 
+        canvas.height - frameWidth * 2
+      );
+      
+      // Cut out inner rectangle for photo
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillRect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
+      ctx.restore();
+    }
+
+    // Draw photo last (on top)
     if (imageLoaded && imageRef.current) {
       console.log('FramePreview: Drawing image with position:', photoPosition, 'photoArea:', photoArea);
       ctx.save();
@@ -182,42 +214,11 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       
       const img = imageRef.current;
       console.log('FramePreview: Drawing image at center:', centerX, centerY, 'with scale:', photoPosition.scale, 'img size:', img.width, 'x', img.height);
+      console.log('FramePreview: Drawing image at position:', -img.width / 2, -img.height / 2, 'scaled size:', img.width * photoPosition.scale, 'x', img.height * photoPosition.scale);
       ctx.drawImage(img, -img.width / 2, -img.height / 2);
       
       ctx.restore();
     }
-
-    // Draw matting if present
-    if (mattingColor && mattingThickness > 0) {
-      ctx.fillStyle = mattingColor;
-      
-      // Outer matting rectangle
-      ctx.fillRect(frameWidth, frameWidth, 
-        canvas.width - frameWidth * 2, 
-        canvas.height - frameWidth * 2
-      );
-      
-      // Cut out inner rectangle for photo
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillRect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
-      ctx.restore();
-    }
-
-    // Draw frame
-    ctx.fillStyle = frameColor;
-    
-    // Outer frame
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Cut out inner area (matting or photo area)
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    const innerArea = mattingColor ? 
-      { x: frameWidth, y: frameWidth, width: canvas.width - frameWidth * 2, height: canvas.height - frameWidth * 2 } :
-      photoArea;
-    ctx.fillRect(innerArea.x, innerArea.y, innerArea.width, innerArea.height);
-    ctx.restore();
 
     // Draw placeholder if no photo
     if (!imageLoaded) {

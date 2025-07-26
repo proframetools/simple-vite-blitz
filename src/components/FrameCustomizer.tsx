@@ -517,8 +517,8 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 frameWidth={selectedThickness?.width_inches ? Math.min(selectedThickness.width_inches * 5, 30) : 15}
                 mattingColor={selectedMatting?.color_hex}
                 mattingThickness={selectedMatting?.thickness_inches ? selectedMatting.thickness_inches * 100 : 0}
-                canvasWidth={400}
-                canvasHeight={500}
+                canvasWidth={600}
+                canvasHeight={750}
                 onPositionChange={setPhotoPosition}
               />
               <div className="mt-4 text-center">
