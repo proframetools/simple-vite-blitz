@@ -64,8 +64,8 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
         .limit(limit);
 
       if (category) {
-        // Add category filtering if needed
-        query = query.eq('material', category);
+        // Add category filtering if needed - ensure proper type casting
+        query = query.eq('material', category as 'wood' | 'metal' | 'acrylic' | 'composite');
       }
 
       const { data, error } = await query;

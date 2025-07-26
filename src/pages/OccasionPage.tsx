@@ -192,7 +192,7 @@ const OccasionPage = () => {
             {/* Search and Filters */}
             <div className="mb-8 space-y-6">
               <ProductSearch searchQuery="" onSearchChange={handleSearch} />
-              <ProductFilters filters={{categories: [], occasions: [], materials: [], priceRange: [PRICE_RANGES.DEFAULT_MIN, PRICE_RANGES.DEFAULT_MAX], inStock: false, minRating: 0}} onFiltersChange={handleFilter} />
+              <ProductFilters filters={{categories: [], occasions: [], materials: [], priceRange: [500, 5000], inStock: false, minRating: 0}} onFiltersChange={handleFilter} />
             </div>
 
             {/* Products Grid */}

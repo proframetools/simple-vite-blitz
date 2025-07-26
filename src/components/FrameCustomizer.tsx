@@ -300,7 +300,11 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
             </CardHeader>
             <CardContent>
               <PhotoUpload
-                onPhotoUploaded={setUploadedPhoto}
+                onPhotoUploaded={(photo) => {
+                  console.log('FrameCustomizer: Received photo data:', photo);
+                  setUploadedPhoto(photo);
+                  toast.success('Photo uploaded! View it in the preview →');
+                }}
                 maxFiles={1}
                 acceptMultiple={false}
               />
@@ -487,17 +491,22 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
           </Card>
         </div>
 
-        {/* Preview Panel */}
+        {/* Preview Panel - Always Visible */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Live Preview</CardTitle>
-                {uploadedPhoto && (
-                  <Badge variant="secondary" className="text-xs">
-                    Photo Loaded
+                <div className="flex items-center gap-2">
+                  {uploadedPhoto && (
+                    <Badge variant="secondary" className="text-xs">
+                      Photo Loaded
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-xs">
+                    Real-time Updates
                   </Badge>
-                )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -511,11 +520,17 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 canvasHeight={500}
                 onPositionChange={setPhotoPosition}
               />
-              {!uploadedPhoto && (
-                <p className="text-sm text-muted-foreground text-center mt-4">
-                  Upload a photo in step 1 to see it in the frame preview above
-                </p>
-              )}
+              <div className="mt-4 text-center">
+                {!uploadedPhoto ? (
+                  <p className="text-sm text-muted-foreground">
+                    Upload a photo to see it in your custom frame
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Use the controls above to adjust your photo position
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
 
