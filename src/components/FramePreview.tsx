@@ -55,44 +55,20 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       setImageError(null);
       setImageLoaded(false);
       
-      // Validate URL format
-      try {
-        new URL(photoUrl);
-        console.log('FramePreview: URL format is valid');
-      } catch (urlError) {
-        console.error('FramePreview: Invalid URL format:', photoUrl);
-        setImageError('Invalid image URL format');
-        setDebugInfo(`Invalid URL: ${photoUrl}`);
-        return;
-      }
-      
-      // Test if URL is accessible
-      fetch(photoUrl, { method: 'HEAD', mode: 'no-cors' })
-        .then(() => {
-          console.log('FramePreview: URL is accessible');
-          setDebugInfo(`URL accessible, loading image...`);
-        })
-        .catch((fetchError) => {
-          console.warn('FramePreview: URL accessibility check failed:', fetchError);
-          setDebugInfo(`URL check failed, trying to load anyway...`);
-        });
+      console.log('FramePreview: Starting image load for URL:', photoUrl);
       
       const img = new Image();
       
-      // Try with CORS first, then fallback without CORS
-      const loadWithCORS = () => {
-        console.log('FramePreview: Attempting to load with CORS');
-        img.crossOrigin = 'anonymous';
-        img.src = photoUrl;
-      };
-      
-      const loadWithoutCORS = () => {
-        console.log('FramePreview: Attempting to load without CORS');
-        img.crossOrigin = '';
-        img.src = photoUrl;
-      };
+      // Set up a timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.error('FramePreview: Image loading timeout');
+        setImageError('Image loading timeout');
+        setDebugInfo('Loading timeout - image took too long to load');
+        setImageLoaded(false);
+      }, 10000); // 10 second timeout
       
       img.onload = () => {
+        clearTimeout(timeoutId);
         console.log('FramePreview: Image loaded successfully', img.width, 'x', img.height);
         imageRef.current = img;
         setImageLoaded(true);
@@ -120,20 +96,15 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       };
       
       img.onerror = (error) => {
-        console.error('FramePreview: Failed to load image with CORS, trying without CORS:', photoUrl, error);
-        
-        // If CORS failed, try without CORS
-        if (img.crossOrigin === 'anonymous') {
-          loadWithoutCORS();
-        } else {
-          setImageLoaded(false);
-          setImageError(`Failed to load image: ${photoUrl}`);
-          setDebugInfo(`Error loading image: ${error}`);
-        }
+        clearTimeout(timeoutId);
+        console.error('FramePreview: Failed to load image:', photoUrl, error);
+        setImageLoaded(false);
+        setImageError(`Failed to load image from: ${photoUrl}`);
+        setDebugInfo(`Error loading image: ${error}`);
       };
       
-      // Start with CORS
-      loadWithCORS();
+      // Simply set the source - Supabase storage URLs should work without CORS issues
+      img.src = photoUrl;
       
     } else {
       imageRef.current = null;
