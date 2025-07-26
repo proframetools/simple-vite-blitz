@@ -86,16 +86,36 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     const fileExt = file.name.split('.').pop();
     const fileName = `${sessionId}/${photoId}.${fileExt}`;
     
+    console.log('PhotoUpload: Uploading file to Supabase:', fileName);
+    console.log('PhotoUpload: File size:', file.size, 'bytes');
+    console.log('PhotoUpload: File type:', file.type);
+    
     const { data, error } = await supabase.storage
       .from('customer-photos')
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    if (error) throw error;
+    if (error) {
+      console.error('PhotoUpload: Upload error:', error);
+      throw error;
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from('customer-photos')
       .getPublicUrl(fileName);
 
+    console.log('PhotoUpload: Generated public URL:', publicUrl);
+    
+    // Test the URL accessibility
+    try {
+      const response = await fetch(publicUrl, { method: 'HEAD' });
+      console.log('PhotoUpload: URL accessibility test:', response.status, response.statusText);
+    } catch (error) {
+      console.error('PhotoUpload: URL accessibility test failed:', error);
+    }
+    
     return publicUrl;
   };
 
@@ -189,6 +209,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       };
 
       console.log('PhotoUpload: Notifying parent with photo data:', uploadedPhotoData);
+      console.log('PhotoUpload: Photo URL:', url);
+      console.log('PhotoUpload: Photo dimensions:', dimensions);
 
       // Notify parent component
       onPhotoUploaded(uploadedPhotoData);

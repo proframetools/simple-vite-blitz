@@ -89,6 +89,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   onAddToCart,
   onClose
 }) => {
+  console.log('FrameCustomizer: Component mounted with product:', product);
   // State for customization options
   const [selectedSize, setSelectedSize] = useState<FrameSize | null>(null);
   const [selectedColor, setSelectedColor] = useState<FrameColor | null>(null);
@@ -123,6 +124,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   }, [product.id]);
 
   const fetchCustomizationOptions = async () => {
+    console.log('FrameCustomizer: Fetching customization options for product:', product.id);
     try {
       const [sizesData, colorsData, thicknessData, mattingData, popularData] = await Promise.all([
         supabase.from('frame_sizes').select('*').eq('is_active', true).order('price_multiplier'),
@@ -131,6 +133,14 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
         supabase.from('matting_options').select('*').eq('is_active', true).order('price_adjustment'),
         supabase.from('popular_combinations').select('*').eq('is_active', true).eq('product_id', product.id).order('popularity_score', { ascending: false })
       ]);
+
+      console.log('FrameCustomizer: Fetched data:', {
+        sizes: sizesData.data?.length || 0,
+        colors: colorsData.data?.length || 0,
+        thickness: thicknessData.data?.length || 0,
+        matting: mattingData.data?.length || 0,
+        popular: popularData.data?.length || 0
+      });
 
       if (sizesData.data) setSizes(sizesData.data);
       if (colorsData.data) setColors(colorsData.data);
@@ -520,6 +530,14 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 canvasHeight={500}
                 onPositionChange={setPhotoPosition}
               />
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
+                  <div>Uploaded photo: {uploadedPhoto ? 'Yes' : 'No'}</div>
+                  <div>Photo URL: {uploadedPhoto?.url || 'None'}</div>
+                  <div>Selected color: {selectedColor?.name || 'None'}</div>
+                  <div>Selected thickness: {selectedThickness?.name || 'None'}</div>
+                </div>
+              )}
               <div className="mt-4 text-center">
                 {!uploadedPhoto ? (
                   <p className="text-sm text-muted-foreground">

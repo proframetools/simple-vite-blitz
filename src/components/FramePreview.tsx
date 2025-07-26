@@ -65,7 +65,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         setImageError('Image loading timeout');
         setDebugInfo('Loading timeout - image took too long to load');
         setImageLoaded(false);
-      }, 10000); // 10 second timeout
+      }, 30000); // 30 second timeout
       
       img.onload = () => {
         clearTimeout(timeoutId);
@@ -98,12 +98,15 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       img.onerror = (errorEvent) => {
         clearTimeout(timeoutId);
         
+        console.error('FramePreview: Image load error for URL:', photoUrl);
+        console.error('FramePreview: Error event:', errorEvent);
+        
         // Test URL accessibility with fetch to get more detailed error info
         fetch(photoUrl, { method: 'HEAD', mode: 'no-cors' })
           .then(() => {
             console.error('FramePreview: Image accessible but failed to load as image:', photoUrl);
-            setImageError('Image format may not be supported');
-            setDebugInfo('Image accessible but format not supported');
+            setImageError('Image format may not be supported or CORS issue');
+            setDebugInfo('Image accessible but format not supported or CORS blocked');
           })
           .catch((fetchError) => {
             console.error('FramePreview: Image not accessible:', photoUrl, fetchError);
@@ -119,8 +122,13 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         });
       };
       
-      // Simply set the source - Supabase storage URLs should work without CORS issues
-      img.src = photoUrl;
+      // Set crossOrigin to handle CORS issues with Supabase storage
+      img.crossOrigin = 'anonymous';
+      
+      // Add a small delay to ensure the image is properly loaded
+      setTimeout(() => {
+        img.src = photoUrl;
+      }, 100);
       
     } else {
       imageRef.current = null;
@@ -134,12 +142,31 @@ const FramePreview: React.FC<FramePreviewProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
+    if (!canvas || !ctx) {
+      console.error('FramePreview: Canvas or context not available');
+      return;
+    }
 
-    console.log('FramePreview: Drawing canvas', { imageLoaded, frameColor, frameWidth });
+    console.log('FramePreview: Drawing canvas', { 
+      imageLoaded, 
+      frameColor, 
+      frameWidth, 
+      canvasWidth, 
+      canvasHeight,
+      photoUrl: photoUrl ? 'URL provided' : 'No URL'
+    });
 
-    // Clear canvas
+    // Clear canvas and add background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Add a background to make sure canvas is visible
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Add a test pattern to verify canvas is working
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
 
     // Calculate dimensions
     const totalFrameWidth = frameWidth + mattingThickness;
@@ -234,6 +261,13 @@ const FramePreview: React.FC<FramePreviewProps> = ({
           photoArea.x + photoArea.width / 2, 
           photoArea.y + photoArea.height / 2 + 10
         );
+        
+        // Add more detailed error info
+        ctx.font = '10px Arial';
+        ctx.fillText(imageError, 
+          photoArea.x + photoArea.width / 2, 
+          photoArea.y + photoArea.height / 2 + 25
+        );
       }
     }
   }, [imageLoaded, photoPosition, frameColor, frameWidth, mattingColor, mattingThickness, photoUrl, imageError]);
@@ -296,8 +330,13 @@ const FramePreview: React.FC<FramePreviewProps> = ({
               ref={canvasRef}
               width={canvasWidth}
               height={canvasHeight}
-              className="border border-border rounded-lg cursor-move mx-auto"
-              style={{ maxWidth: '100%', height: 'auto' }}
+              className="border border-border rounded-lg cursor-move mx-auto block"
+              style={{ 
+                maxWidth: '100%', 
+                height: 'auto',
+                display: 'block',
+                backgroundColor: '#f8f9fa'
+              }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -327,9 +366,15 @@ const FramePreview: React.FC<FramePreviewProps> = ({
             </div>
             
             {/* Debug info in development */}
-            {process.env.NODE_ENV === 'development' && debugInfo && (
+            {process.env.NODE_ENV === 'development' && (
               <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
-                Debug: {debugInfo}
+                <div>Debug: {debugInfo}</div>
+                <div>Canvas size: {canvasWidth}x{canvasHeight}</div>
+                <div>Frame color: {frameColor}</div>
+                <div>Frame width: {frameWidth}</div>
+                <div>Photo URL: {photoUrl ? 'Provided' : 'None'}</div>
+                <div>Image loaded: {imageLoaded ? 'Yes' : 'No'}</div>
+                {imageError && <div>Error: {imageError}</div>}
               </div>
             )}
           </div>
@@ -395,6 +440,41 @@ const FramePreview: React.FC<FramePreviewProps> = ({
                 <Move className="h-4 w-4 mr-2" />
                 Reset Position
               </Button>
+              
+                          {/* Test button for debugging */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                console.log('FramePreview: Test button clicked');
+                console.log('Current state:', {
+                  photoUrl,
+                  imageLoaded,
+                  imageError,
+                  photoPosition,
+                  canvasWidth,
+                  canvasHeight
+                });
+                
+                // Test with a sample image
+                const testImg = new Image();
+                testImg.onload = () => {
+                  console.log('FramePreview: Test image loaded successfully');
+                  imageRef.current = testImg;
+                  setImageLoaded(true);
+                  setImageError(null);
+                  setDebugInfo('Test image loaded successfully');
+                };
+                testImg.onerror = () => {
+                  console.log('FramePreview: Test image failed to load');
+                  setImageError('Test image failed to load');
+                };
+                testImg.crossOrigin = 'anonymous';
+                testImg.src = 'https://picsum.photos/400/300';
+              }}
+            >
+              Test Image
+            </Button>
             </div>
 
             <p className="text-xs text-muted-foreground">
