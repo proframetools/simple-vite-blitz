@@ -21,6 +21,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminSettings from "./pages/AdminSettings";
+import AdminIndex from "./pages/AdminIndex";
+import AdminTest from "./pages/AdminTest";
 
 const queryClient = new QueryClient();
 
@@ -44,11 +46,13 @@ const App = () => (
           <Route path="/occasion/:slug" element={<OccasionPage />} />
           
           {/* Admin Routes */}
+          <Route path="/admin" element={<AdminIndex />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/test" element={<AdminTest />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
