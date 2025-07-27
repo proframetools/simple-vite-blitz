@@ -513,9 +513,9 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
               <FramePreview
                 photoUrl={uploadedPhoto?.url}
                 frameColor={selectedColor?.hex_code || '#8B4513'}
-                frameWidth={selectedThickness?.width_inches ? selectedThickness.width_inches * 10 : 20}
+                frameWidth={selectedThickness?.width_inches ? Math.max(selectedThickness.width_inches * 2, 8) : 12}
                 mattingColor={selectedMatting?.color_hex}
-                mattingThickness={selectedMatting?.thickness_inches ? selectedMatting.thickness_inches * 100 : 0}
+                mattingThickness={selectedMatting?.thickness_inches ? Math.max(selectedMatting.thickness_inches * 20, 10) : 0}
                 canvasWidth={400}
                 canvasHeight={500}
                 onPositionChange={setPhotoPosition}

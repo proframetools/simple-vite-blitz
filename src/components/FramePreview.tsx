@@ -46,6 +46,24 @@ const FramePreview: React.FC<FramePreviewProps> = ({
   const [imageError, setImageError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
 
+  // Calculate photo area (inside frame and matting)
+  const photoAreaLeft = frameWidth + mattingThickness;
+  const photoAreaTop = frameWidth + mattingThickness;
+  const photoAreaWidth = canvasWidth - 2 * (frameWidth + mattingThickness);
+  const photoAreaHeight = canvasHeight - 2 * (frameWidth + mattingThickness);
+  
+  // Debug logging for thickness calculations
+  console.log('FramePreview: Frame calculations:', {
+    frameWidth,
+    mattingThickness,
+    photoAreaLeft,
+    photoAreaTop,
+    photoAreaWidth,
+    photoAreaHeight,
+    canvasWidth,
+    canvasHeight
+  });
+
   // Load image when photoUrl changes
   useEffect(() => {
     console.log('FramePreview: photoUrl changed to:', photoUrl);
@@ -75,23 +93,22 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         setImageError(null);
         setDebugInfo(`Image loaded: ${img.width}x${img.height}`);
         
-        // Auto-fit image to frame
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const frameArea = {
-            width: canvas.width - (frameWidth + mattingThickness) * 2,
-            height: canvas.height - (frameWidth + mattingThickness) * 2
+        // Auto-fit image to available photo area
+        if (photoAreaWidth > 0 && photoAreaHeight > 0) {
+          const scale = Math.min(photoAreaWidth / img.width, photoAreaHeight / img.height);
+          const newPosition = {
+            x: 0, // Center in the photo area
+            y: 0,
+            scale: scale,
+            rotation: 0
           };
-          
-          const scaleX = frameArea.width / img.width;
-          const scaleY = frameArea.height / img.height;
-          const scale = Math.min(scaleX, scaleY, 1); // Don't upscale beyond original size
-          
-          console.log('FramePreview: Auto-fitting image with scale:', scale);
-          setPhotoPosition(prev => ({
-            ...prev,
-            scale
-          }));
+          console.log('FramePreview: Auto-fit photo:', {
+            imageSize: { width: img.width, height: img.height },
+            photoArea: { width: photoAreaWidth, height: photoAreaHeight },
+            calculatedScale: scale,
+            position: newPosition
+          });
+          setPhotoPosition(newPosition);
         }
       };
       
@@ -133,33 +150,28 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    console.log('FramePreview: Drawing canvas', { imageLoaded, frameColor, frameWidth });
+    console.log('FramePreview: Drawing canvas', { imageLoaded, frameColor, frameWidth, mattingThickness });
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Calculate dimensions
-    const totalFrameWidth = frameWidth + mattingThickness;
-    const photoArea = {
-      x: totalFrameWidth,
-      y: totalFrameWidth,
-      width: canvas.width - totalFrameWidth * 2,
-      height: canvas.height - totalFrameWidth * 2
-    };
+    // Draw photo area background (white background for photo)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
 
     // Draw photo if loaded
     if (imageLoaded && imageRef.current) {
       console.log('FramePreview: Drawing image with position:', photoPosition);
-      ctx.save();
       
-      // Clip to photo area
+      // Create clipping path for photo area
+      ctx.save();
       ctx.beginPath();
-      ctx.rect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
+      ctx.rect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
       ctx.clip();
       
-      // Transform for photo positioning
-      const centerX = photoArea.x + photoArea.width / 2;
-      const centerY = photoArea.y + photoArea.height / 2;
+      // Draw the photo with transformations (centered in photo area)
+      const centerX = photoAreaLeft + photoAreaWidth / 2;
+      const centerY = photoAreaTop + photoAreaHeight / 2;
       
       ctx.translate(centerX + photoPosition.x, centerY + photoPosition.y);
       ctx.rotate((photoPosition.rotation * Math.PI) / 180);
@@ -169,71 +181,63 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       ctx.drawImage(img, -img.width / 2, -img.height / 2);
       
       ctx.restore();
-    }
-
-    // Draw matting if present
-    if (mattingColor && mattingThickness > 0) {
-      ctx.fillStyle = mattingColor;
-      
-      // Outer matting rectangle
-      ctx.fillRect(frameWidth, frameWidth, 
-        canvas.width - frameWidth * 2, 
-        canvas.height - frameWidth * 2
-      );
-      
-      // Cut out inner rectangle for photo
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillRect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
-      ctx.restore();
-    }
-
-    // Draw frame
-    ctx.fillStyle = frameColor;
-    
-    // Outer frame
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Cut out inner area (matting or photo area)
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    const innerArea = mattingColor ? 
-      { x: frameWidth, y: frameWidth, width: canvas.width - frameWidth * 2, height: canvas.height - frameWidth * 2 } :
-      photoArea;
-    ctx.fillRect(innerArea.x, innerArea.y, innerArea.width, innerArea.height);
-    ctx.restore();
-
-    // Draw placeholder if no photo
-    if (!imageLoaded) {
-      ctx.fillStyle = '#f8f9fa';
-      ctx.fillRect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
-      
-      // Draw border for photo area
-      ctx.strokeStyle = '#e9ecef';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      ctx.strokeRect(photoArea.x, photoArea.y, photoArea.width, photoArea.height);
-      ctx.setLineDash([]);
-      
-      // Draw text
+      console.log('FramePreview: Drew photo with position:', photoPosition);
+    } else {
+      // Draw placeholder text
       ctx.fillStyle = '#6c757d';
       ctx.font = '16px Arial';
       ctx.textAlign = 'center';
       ctx.fillText(photoUrl ? 'Loading photo...' : 'Upload a photo', 
-        photoArea.x + photoArea.width / 2, 
-        photoArea.y + photoArea.height / 2 - 10
+        photoAreaLeft + photoAreaWidth / 2, 
+        photoAreaTop + photoAreaHeight / 2 - 10
       );
       
       if (imageError) {
         ctx.fillStyle = '#dc3545';
         ctx.font = '12px Arial';
         ctx.fillText('Error loading image', 
-          photoArea.x + photoArea.width / 2, 
-          photoArea.y + photoArea.height / 2 + 10
+          photoAreaLeft + photoAreaWidth / 2, 
+          photoAreaTop + photoAreaHeight / 2 + 10
         );
       }
+      
+      // Draw dashed border for photo area
+      ctx.strokeStyle = '#e9ecef';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
+      ctx.setLineDash([]);
     }
-  }, [imageLoaded, photoPosition, frameColor, frameWidth, mattingColor, mattingThickness, photoUrl, imageError]);
+
+    // Draw matting if specified
+    if (mattingColor && mattingThickness > 0) {
+      ctx.fillStyle = mattingColor;
+      ctx.fillRect(frameWidth, frameWidth, canvasWidth - 2 * frameWidth, canvasHeight - 2 * frameWidth);
+      
+      // Cut out the photo area from matting
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
+      ctx.restore();
+    }
+
+    // Draw frame (outer border)
+    ctx.fillStyle = frameColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    
+    // Cut out the inner area (for matting or photo)
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    if (mattingColor && mattingThickness > 0) {
+      // Cut out area for matting
+      ctx.fillRect(frameWidth, frameWidth, canvasWidth - 2 * frameWidth, canvasHeight - 2 * frameWidth);
+    } else {
+      // Cut out area directly for photo
+      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
+    }
+    ctx.restore();
+    
+  }, [imageLoaded, photoPosition, frameColor, frameWidth, mattingColor, mattingThickness, photoUrl, imageError, photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight]);
 
   // Mouse event handlers for dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -324,9 +328,14 @@ const FramePreview: React.FC<FramePreviewProps> = ({
             </div>
             
             {/* Debug info in development */}
-            {process.env.NODE_ENV === 'development' && debugInfo && (
+            {process.env.NODE_ENV === 'development' && (
               <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
-                Debug: {debugInfo}
+                <div>Debug: {debugInfo}</div>
+                <div>Frame: {frameWidth}px, Matting: {mattingThickness}px</div>
+                <div>Photo Area: {photoAreaWidth}x{photoAreaHeight}px</div>
+                {imageLoaded && (
+                  <div>Scale: {photoPosition.scale.toFixed(3)}, Position: ({photoPosition.x}, {photoPosition.y})</div>
+                )}
               </div>
             )}
           </div>
