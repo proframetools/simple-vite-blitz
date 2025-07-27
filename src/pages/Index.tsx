@@ -1,29 +1,38 @@
+import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import ProductCarousel from "@/components/ProductCarousel";
 import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import GlobalWhatsAppWidget from "@/components/GlobalWhatsAppWidget";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <Header />
       <main>
         <Hero />
-        <ProductCarousel 
-          title="Featured Frames"
-          subtitle="Discover our most popular and beautifully crafted photo frames, perfect for your precious memories"
-          maxProducts={8}
-        />
         <Features />
+        
+        {/* Admin Test Link */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Admin Panel Test</h2>
+            <div className="space-x-4">
+              <Button asChild>
+                <a href="/admin">Go to Admin</a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href="/admin/login">Admin Login</a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href="/admin/dashboard">Admin Dashboard</a>
+              </Button>
+            </div>
+          </div>
+        </div>
       </main>
       <Footer />
-      <GlobalWhatsAppWidget 
-        showFloatingButton={true}
-        showContactCard={true}
-        position="bottom-right"
-      />
+      <GlobalWhatsAppWidget />
     </div>
   );
 };

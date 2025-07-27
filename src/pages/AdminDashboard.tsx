@@ -12,7 +12,6 @@ import {
   CheckCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import AdminLayout from "@/components/AdminLayout";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -85,7 +84,25 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <AdminLayout>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-900">FrameCraft Admin</h1>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/admin/login")}
+              className="flex items-center gap-2"
+            >
+              Login
+            </Button>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -206,7 +223,7 @@ const AdminDashboard = () => {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

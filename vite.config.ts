@@ -13,6 +13,9 @@ export default defineConfig(({ mode }) => ({
       clientPort: 8080,
     },
   },
+  preview: {
+    port: 8080,
+  },
   plugins: [
     react(),
     mode === 'development' &&

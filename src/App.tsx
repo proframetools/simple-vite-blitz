@@ -23,6 +23,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminSettings from "./pages/AdminSettings";
 import AdminIndex from "./pages/AdminIndex";
 import AdminTest from "./pages/AdminTest";
+import SimpleAdmin from "./pages/SimpleAdmin";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/test" element={<AdminTest />} />
+          <Route path="/admin/simple" element={<SimpleAdmin />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
