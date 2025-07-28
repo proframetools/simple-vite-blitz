@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, Eye, Share2, Download, Edit, Maximize } from 'lucide-react';
+import { formatPrice } from '@/lib/currency';
 import FramePreview from '../FramePreview';
 import { WizardData } from '../CustomFrameWizard';
 
@@ -305,7 +306,7 @@ const ReviewStepComponent: React.FC<ReviewStepComponentProps> = ({
                       )}
                     </div>
                     <div className="text-right">
-                      {item.price > 0 && <div>+${item.price}</div>}
+                      {item.price > 0 && <div>+{formatPrice(item.price)}</div>}
                       {item.multiplier && item.multiplier !== 1 && (
                         <div className="text-sm text-muted-foreground">×{item.multiplier}</div>
                       )}
@@ -319,7 +320,7 @@ const ReviewStepComponent: React.FC<ReviewStepComponentProps> = ({
               
               <div className="flex justify-between items-center text-lg font-semibold">
                 <span>Total</span>
-                <span>${wizardData.totalPrice.toFixed(2)}</span>
+                <span>{formatPrice(wizardData.totalPrice)}</span>
               </div>
             </CardContent>
           </Card>

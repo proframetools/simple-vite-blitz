@@ -178,7 +178,7 @@ const SizeStepComponent: React.FC<SizeStepComponentProps> = ({
                       onClick={() => handleSizeSelect(getSizeRecommendation()!)}
                       className="border-green-300 hover:bg-green-100"
                     >
-                      {getSizeRecommendation()?.display_name} - ${(product.base_price * getSizeRecommendation()!.price_multiplier).toFixed(2)}
+                      {getSizeRecommendation()?.display_name} - {formatPrice(product.base_price * getSizeRecommendation()!.price_multiplier)}
                     </Button>
                   </CardContent>
                 </Card>
@@ -204,7 +204,7 @@ const SizeStepComponent: React.FC<SizeStepComponentProps> = ({
                       >
                         <div className="font-medium">{size.display_name}</div>
                         <div className="text-sm text-muted-foreground mt-1">
-                          ${(product.base_price * size.price_multiplier).toFixed(2)}
+                          {formatPrice(product.base_price * size.price_multiplier)}
                         </div>
                         <Badge variant="secondary" className="mt-2 text-xs">
                           Popular
@@ -231,7 +231,7 @@ const SizeStepComponent: React.FC<SizeStepComponentProps> = ({
                     >
                       <div className="font-medium text-sm">{size.display_name}</div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        ${(product.base_price * size.price_multiplier).toFixed(2)}
+                        {formatPrice(product.base_price * size.price_multiplier)}
                       </div>
                     </button>
                   ))}
@@ -284,7 +284,7 @@ const SizeStepComponent: React.FC<SizeStepComponentProps> = ({
                         <strong>Custom Size:</strong> {customWidth}" × {customHeight}"
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Estimated Price: ${wizardData.totalPrice.toFixed(2)} (includes 20% custom size premium)
+                        Estimated Price: {formatPrice(wizardData.totalPrice)} (includes 20% custom size premium)
                       </p>
                     </div>
                   )}

@@ -404,11 +404,11 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                       style={{ backgroundColor: color.hex_code }}
                     />
                     <div className="text-xs font-medium">{color.name}</div>
-                    {color.price_adjustment > 0 && (
-                      <div className="text-xs text-muted-foreground">
-                        +${color.price_adjustment}
-                      </div>
-                    )}
+                        {color.price_adjustment > 0 && (
+                          <div className="text-xs text-primary">
+                            +{formatPrice(color.price_adjustment)}
+                          </div>
+                        )}
                   </button>
                 ))}
               </div>
@@ -480,7 +480,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                         <div className="font-medium">{matting.name}</div>
                         <div className="text-xs text-muted-foreground">
                           {matting.is_double_mat ? 'Double Mat' : 'Single Mat'} • 
-                          +${matting.price_adjustment}
+                          +{formatPrice(matting.price_adjustment)}
                         </div>
                       </div>
                     </div>

@@ -224,7 +224,7 @@ const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                           <div className="flex items-center justify-between pt-3 border-t">
                             <div>
                               <span className="text-2xl font-bold text-primary">
-                                ${calculateCombinationPrice(combo).toFixed(2)}
+                                {formatPrice(calculateCombinationPrice(combo))}
                               </span>
                             </div>
                             <Button
@@ -288,7 +288,7 @@ const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                         <div className="flex items-center justify-between pt-3 border-t">
                           <div>
                             <span className="text-2xl font-bold text-primary">
-                              ${calculateCombinationPrice(combo).toFixed(2)}
+                              {formatPrice(calculateCombinationPrice(combo))}
                             </span>
                           </div>
                           <Button

@@ -217,8 +217,8 @@ export default function ProductFilters({ filters, onFiltersChange }: ProductFilt
             className="w-full"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>${filters.priceRange[0]}</span>
-            <span>${filters.priceRange[1]}</span>
+            <span>{formatPrice(filters.priceRange[0])}</span>
+            <span>{formatPrice(filters.priceRange[1])}</span>
           </div>
         </CollapsibleContent>
       </Collapsible>
