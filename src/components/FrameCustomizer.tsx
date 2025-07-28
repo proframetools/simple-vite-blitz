@@ -346,7 +346,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                     >
                       <div className="font-medium">{size.display_name}</div>
                       <div className="text-xs text-muted-foreground">
-                        ${(product.base_price * size.price_multiplier).toFixed(2)}
+                        {formatPrice(product.base_price * size.price_multiplier)}
                       </div>
                     </button>
                   ))}
@@ -568,7 +568,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Base Frame ({product.name})</span>
-                  <span>${product.base_price.toFixed(2)}</span>
+                  <span>{formatPrice(product.base_price)}</span>
                 </div>
                 
                 {selectedSize && (
@@ -581,7 +581,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 {selectedColor && selectedColor.price_adjustment > 0 && (
                   <div className="flex justify-between">
                     <span>Color ({selectedColor.name})</span>
-                    <span>+${selectedColor.price_adjustment.toFixed(2)}</span>
+                    <span>+{formatPrice(selectedColor.price_adjustment)}</span>
                   </div>
                 )}
                 
@@ -595,7 +595,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 {selectedMatting && (
                   <div className="flex justify-between">
                     <span>Matting ({selectedMatting.name})</span>
-                    <span>+${selectedMatting.price_adjustment.toFixed(2)}</span>
+                    <span>+{formatPrice(selectedMatting.price_adjustment)}</span>
                   </div>
                 )}
 
@@ -611,7 +611,7 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
               
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Price</span>
-                <span>${calculatePrice().toFixed(2)}</span>
+                <span>{formatPrice(calculatePrice())}</span>
               </div>
               
               <div className="flex gap-3 pt-4">
