@@ -93,19 +93,28 @@ const FramePreview: React.FC<FramePreviewProps> = ({
         setImageError(null);
         setDebugInfo(`Image loaded: ${img.width}x${img.height}`);
         
-        // Auto-fit image to available photo area
+        // Auto-fit image to available photo area with minimum scale
         if (photoAreaWidth > 0 && photoAreaHeight > 0) {
-          const scale = Math.min(photoAreaWidth / img.width, photoAreaHeight / img.height);
+          const scaleX = photoAreaWidth / img.width;
+          const scaleY = photoAreaHeight / img.height;
+          const scale = Math.min(scaleX, scaleY, 1); // Cap at 1x to prevent enlargement
+          
+          // Ensure minimum scale for visibility (at least 30% of optimal)
+          const minScale = Math.min(0.3, Math.max(scaleX, scaleY) * 0.5);
+          const finalScale = Math.max(scale, minScale);
+          
           const newPosition = {
             x: 0, // Center in the photo area
             y: 0,
-            scale: scale,
+            scale: finalScale,
             rotation: 0
           };
           console.log('FramePreview: Auto-fit photo:', {
             imageSize: { width: img.width, height: img.height },
             photoArea: { width: photoAreaWidth, height: photoAreaHeight },
             calculatedScale: scale,
+            minScale: minScale,
+            finalScale: finalScale,
             position: newPosition
           });
           setPhotoPosition(newPosition);
@@ -395,11 +404,37 @@ const FramePreview: React.FC<FramePreviewProps> = ({
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => {
+                  if (imageRef.current && photoAreaWidth > 0 && photoAreaHeight > 0) {
+                    const img = imageRef.current;
+                    const scaleX = photoAreaWidth / img.width;
+                    const scaleY = photoAreaHeight / img.height;
+                    const scale = Math.min(scaleX, scaleY, 1);
+                    const minScale = Math.min(0.3, Math.max(scaleX, scaleY) * 0.5);
+                    const finalScale = Math.max(scale, minScale);
+                    
+                    const newPosition = {
+                      x: 0,
+                      y: 0,
+                      scale: finalScale,
+                      rotation: 0
+                    };
+                    setPhotoPosition(newPosition);
+                    onPositionChange?.(newPosition);
+                  }
+                }}
+                className="flex-1"
+              >
+                Fit Photo
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={resetPosition}
                 className="flex-1"
               >
                 <Move className="h-4 w-4 mr-2" />
-                Reset Position
+                Reset
               </Button>
             </div>
 

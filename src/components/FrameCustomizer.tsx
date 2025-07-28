@@ -513,11 +513,11 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
               <FramePreview
                 photoUrl={uploadedPhoto?.url}
                 frameColor={selectedColor?.hex_code || '#8B4513'}
-                frameWidth={selectedThickness?.width_inches ? Math.max(selectedThickness.width_inches * 2, 8) : 12}
+                frameWidth={selectedThickness?.width_inches ? Math.max(selectedThickness.width_inches * 0.8, 8) : 12}
                 mattingColor={selectedMatting?.color_hex}
-                mattingThickness={selectedMatting?.thickness_inches ? Math.max(selectedMatting.thickness_inches * 20, 10) : 0}
-                canvasWidth={400}
-                canvasHeight={500}
+                mattingThickness={selectedMatting?.thickness_inches ? Math.max(selectedMatting.thickness_inches * 5, 5) : 0}
+                canvasWidth={500}
+                canvasHeight={600}
                 onPositionChange={setPhotoPosition}
               />
               <div className="mt-4 text-center">
