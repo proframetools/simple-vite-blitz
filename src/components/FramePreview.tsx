@@ -164,11 +164,33 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw photo area background (white background for photo)
+    // STEP 1: Draw frame base (foundation layer)
+    ctx.fillStyle = frameColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    
+    // STEP 2: Draw frame opening (cut out inner area)
+    if (mattingColor && mattingThickness > 0) {
+      // Frame opening for matting area
+      ctx.fillStyle = mattingColor;
+      ctx.fillRect(frameWidth, frameWidth, canvasWidth - 2 * frameWidth, canvasHeight - 2 * frameWidth);
+    } else {
+      // Frame opening directly for photo area
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
+    }
+
+    // STEP 3: Draw matting layer (if specified)
+    if (mattingColor && mattingThickness > 0) {
+      // Draw matting opening for photo
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
+    }
+
+    // STEP 4: Draw photo background (white background for photo area)
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
 
-    // Draw photo if loaded
+    // STEP 5: Draw photo content (if loaded)
     if (imageLoaded && imageRef.current) {
       console.log('FramePreview: Drawing image with position:', photoPosition);
       
@@ -192,7 +214,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       ctx.restore();
       console.log('FramePreview: Drew photo with position:', photoPosition);
     } else {
-      // Draw placeholder text
+      // Draw placeholder text in photo area
       ctx.fillStyle = '#6c757d';
       ctx.font = '16px Arial';
       ctx.textAlign = 'center';
@@ -217,34 +239,6 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       ctx.strokeRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
       ctx.setLineDash([]);
     }
-
-    // Draw matting if specified
-    if (mattingColor && mattingThickness > 0) {
-      ctx.fillStyle = mattingColor;
-      ctx.fillRect(frameWidth, frameWidth, canvasWidth - 2 * frameWidth, canvasHeight - 2 * frameWidth);
-      
-      // Cut out the photo area from matting
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
-      ctx.restore();
-    }
-
-    // Draw frame (outer border)
-    ctx.fillStyle = frameColor;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    
-    // Cut out the inner area (for matting or photo)
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    if (mattingColor && mattingThickness > 0) {
-      // Cut out area for matting
-      ctx.fillRect(frameWidth, frameWidth, canvasWidth - 2 * frameWidth, canvasHeight - 2 * frameWidth);
-    } else {
-      // Cut out area directly for photo
-      ctx.fillRect(photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight);
-    }
-    ctx.restore();
     
   }, [imageLoaded, photoPosition, frameColor, frameWidth, mattingColor, mattingThickness, photoUrl, imageError, photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight]);
 
