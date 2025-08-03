@@ -14,7 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      frame_colors: {
+        Row: {
+          created_at: string
+          display_name: string
+          hex_code: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_adjustment: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          hex_code?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_adjustment?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          hex_code?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_adjustment?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      frame_sizes: {
+        Row: {
+          created_at: string
+          display_name: string
+          height_inches: number
+          id: string
+          is_active: boolean
+          name: string
+          price_multiplier: number
+          updated_at: string
+          width_inches: number
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          height_inches: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price_multiplier?: number
+          updated_at?: string
+          width_inches: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          height_inches?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_multiplier?: number
+          updated_at?: string
+          width_inches?: number
+        }
+        Relationships: []
+      }
+      frame_thickness: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          name: string
+          price_adjustment: number | null
+          thickness_mm: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price_adjustment?: number | null
+          thickness_mm: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_adjustment?: number | null
+          thickness_mm?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      matting_options: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          name: string
+          price_adjustment: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price_adjustment?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_adjustment?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          base_price: number
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
