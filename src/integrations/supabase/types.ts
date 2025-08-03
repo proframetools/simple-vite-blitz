@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          is_active: boolean
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      aspect_ratios: {
+        Row: {
+          created_at: string
+          display_name: string
+          height_ratio: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          width_ratio: number
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          height_ratio: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          width_ratio: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          height_ratio?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          width_ratio?: number
+        }
+        Relationships: []
+      }
       frame_colors: {
         Row: {
           created_at: string
@@ -43,6 +109,36 @@ export type Database = {
           is_active?: boolean
           name?: string
           price_adjustment?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      frame_orientations: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          name?: string
           updated_at?: string
         }
         Relationships: []
@@ -148,6 +244,175 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      preview_images: {
+        Row: {
+          alt_text: string | null
+          aspect_ratio_id: string
+          color_id: string
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          orientation_id: string
+          thickness_id: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          aspect_ratio_id: string
+          color_id: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          orientation_id: string
+          thickness_id: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          aspect_ratio_id?: string
+          color_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          orientation_id?: string
+          thickness_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preview_images_aspect_ratio_id_fkey"
+            columns: ["aspect_ratio_id"]
+            isOneToOne: false
+            referencedRelation: "aspect_ratios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preview_images_color_id_fkey"
+            columns: ["color_id"]
+            isOneToOne: false
+            referencedRelation: "frame_colors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preview_images_orientation_id_fkey"
+            columns: ["orientation_id"]
+            isOneToOne: false
+            referencedRelation: "frame_orientations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preview_images_thickness_id_fkey"
+            columns: ["thickness_id"]
+            isOneToOne: false
+            referencedRelation: "frame_thickness"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          aspect_ratio_id: string
+          color_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          matting_id: string | null
+          orientation_id: string
+          price_adjustment: number | null
+          product_id: string
+          size_id: string
+          sku: string
+          stock_quantity: number | null
+          thickness_id: string
+          updated_at: string
+        }
+        Insert: {
+          aspect_ratio_id: string
+          color_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          matting_id?: string | null
+          orientation_id: string
+          price_adjustment?: number | null
+          product_id: string
+          size_id: string
+          sku: string
+          stock_quantity?: number | null
+          thickness_id: string
+          updated_at?: string
+        }
+        Update: {
+          aspect_ratio_id?: string
+          color_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          matting_id?: string | null
+          orientation_id?: string
+          price_adjustment?: number | null
+          product_id?: string
+          size_id?: string
+          sku?: string
+          stock_quantity?: number | null
+          thickness_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_aspect_ratio_id_fkey"
+            columns: ["aspect_ratio_id"]
+            isOneToOne: false
+            referencedRelation: "aspect_ratios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_color_id_fkey"
+            columns: ["color_id"]
+            isOneToOne: false
+            referencedRelation: "frame_colors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_matting_id_fkey"
+            columns: ["matting_id"]
+            isOneToOne: false
+            referencedRelation: "matting_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_orientation_id_fkey"
+            columns: ["orientation_id"]
+            isOneToOne: false
+            referencedRelation: "frame_orientations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_size_id_fkey"
+            columns: ["size_id"]
+            isOneToOne: false
+            referencedRelation: "frame_sizes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_thickness_id_fkey"
+            columns: ["thickness_id"]
+            isOneToOne: false
+            referencedRelation: "frame_thickness"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
