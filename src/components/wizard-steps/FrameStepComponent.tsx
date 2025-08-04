@@ -61,22 +61,28 @@ const FrameStepComponent: React.FC<FrameStepComponentProps> = ({
 
   const fetchFrameOptions = async () => {
     try {
-      const [colorsData, thicknessData, popularData] = await Promise.all([
+      const [colorsData, thicknessData] = await Promise.all([
         supabase.from('frame_colors').select('*').eq('is_active', true).order('name'),
-        supabase.from('frame_thickness').select('*').eq('is_active', true).order('price_multiplier'),
-        supabase.from('popular_combinations').select('*').eq('is_active', true).eq('product_id', product.id).order('popularity_score', { ascending: false })
+        supabase.from('frame_thickness').select('*').eq('is_active', true).order('price_adjustment')
       ]);
 
       if (colorsData.data) setColors(colorsData.data);
-      if (thicknessData.data) setThicknesses(thicknessData.data);
-      if (popularData.data) setPopularCombinations(popularData.data);
+      if (thicknessData.data) {
+        // Map database fields to component interface
+        const mappedThickness = thicknessData.data.map(item => ({
+          ...item,
+          width_inches: item.thickness_mm / 25.4, // Convert mm to inches
+          price_multiplier: 1 + (item.price_adjustment || 0) / 100 // Convert adjustment to multiplier
+        }));
+        setThicknesses(mappedThickness);
+      }
+      
+      // Mock popular combinations since table doesn't exist
+      setPopularCombinations([]);
 
       // Set default selections
       if (colorsData.data?.length && !wizardData.color) {
         onUpdate({ color: colorsData.data[0] });
-      }
-      if (thicknessData.data?.length && !wizardData.thickness) {
-        onUpdate({ thickness: thicknessData.data[0] });
       }
     } catch (error) {
       console.error('Error fetching frame options:', error);

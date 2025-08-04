@@ -16,20 +16,15 @@ interface Product {
   name: string;
   description: string | null;
   base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  stock_quantity: number | null;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  // Mock fields for display
   average_rating?: number | null;
   review_count?: number | null;
   popularity_score?: number | null;
   is_featured?: boolean;
-  product_images?: Array<{
-    image_url: string;
-    alt_text?: string | null;
-    is_primary: boolean;
-    sort_order?: number;
-  }>;
 }
 
 interface ProductCarouselProps {
@@ -80,16 +75,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
       // Simple query that works with existing database schema
       const { data, error } = await supabase
         .from('products')
-        .select(`
-          id,
-          name,
-          description,
-          base_price,
-          material,
-          style,
-          image_url,
-          stock_quantity
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(maxProducts);
@@ -105,8 +91,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         average_rating: 4.5 + (Math.random() * 0.5), // 4.5-5.0 stars
         review_count: Math.floor(Math.random() * 100) + 20, // 20-120 reviews
         popularity_score: 90 - (index * 5), // Decreasing popularity
-        is_featured: index < 6, // First 6 products are featured
-        product_images: [] // Empty array for now
+        is_featured: index < 6 // First 6 products are featured
       }));
       
       setProducts(productsWithMockData);
@@ -164,9 +149,8 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     navigate(`/product/${productId}`);
   };
 
-  const getProductImage = (product: Product) => {
-    const primaryImage = product.product_images?.find(img => img.is_primary);
-    return primaryImage?.image_url || product.image_url || frameCollection;
+  const getProductImage = () => {
+    return frameCollection;
   };
 
   const renderStars = (rating: number | null) => {
@@ -291,7 +275,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
             <Card key={product.id} className="group hover:shadow-hover transition-smooth overflow-hidden">
               <div className="relative aspect-square overflow-hidden">
                 <img
-                  src={getProductImage(product)}
+                  src={getProductImage()}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-smooth cursor-pointer"
                   onClick={() => handleViewProduct(product.id)}
@@ -321,13 +305,8 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   <Badge variant="secondary" className="bg-accent text-accent-foreground font-semibold">
-                    {product.style}
+                    {product.category || 'Frame'}
                   </Badge>
-                  {product.stock_quantity && product.stock_quantity <= 5 && (
-                    <Badge variant="destructive" className="text-xs">
-                      Only {product.stock_quantity} left
-                    </Badge>
-                  )}
                 </div>
               </div>
               
@@ -353,7 +332,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                 
                 <div className="flex items-center justify-between mb-3">
                   <Badge variant="outline" className="text-xs">
-                    {product.material}
+                    {product.category || 'Frame'}
                   </Badge>
                   <span className="text-lg font-bold text-foreground">
                     {formatPrice(product.base_price)}
@@ -368,10 +347,9 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                     size="sm"
                     className="flex-1"
                     onClick={() => handleAddToCart(product.id, product.name)}
-                    disabled={product.stock_quantity === 0}
                   >
                     <ShoppingCart className="h-3 w-3 mr-1" />
-                    {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    Add to Cart
                   </Button>
                   <WhatsAppButton 
                     onClick={() => openWhatsAppInquiry(product.name)}

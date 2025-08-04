@@ -159,11 +159,7 @@ const VariantManager = () => {
       setVariants(transformedVariants);
     } catch (error) {
       console.error('Error loading variants:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load product variants",
-        variant: "destructive",
-      });
+      toast.error("Failed to load product variants");
     }
   };
 

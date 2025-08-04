@@ -27,25 +27,13 @@ const ProductImageGallery = ({ productId, primaryImage }: ProductImageGalleryPro
 
   const fetchProductImages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('product_images')
-        .select('*')
-        .eq('product_id', productId)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-
-      // If no images found, use the primary image
-      if (!data || data.length === 0) {
-        setImages([{
-          id: 'primary',
-          image_url: primaryImage,
-          alt_text: 'Product image',
-          sort_order: 0
-        }]);
-      } else {
-        setImages(data);
-      }
+      // Since product_images table doesn't exist, use placeholder images
+      setImages([{
+        id: 'primary',
+        image_url: primaryImage,
+        alt_text: 'Product image',
+        sort_order: 0
+      }]);
     } catch (error) {
       console.error('Error fetching product images:', error);
       // Fallback to primary image

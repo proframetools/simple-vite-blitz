@@ -12,15 +12,14 @@ interface Product {
   id: string;
   name: string;
   base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  average_rating: number | null;
-  review_count: number | null;
-  product_images?: Array<{
-    image_url: string;
-    is_primary: boolean;
-  }>;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  description: string | null;
+  // Mock fields for display
+  average_rating?: number | null;
+  review_count?: number | null;
 }
 
 interface ProductCarouselSimpleProps {
@@ -51,21 +50,13 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
       
       let query = supabase
         .from('products')
-        .select(`
-          id,
-          name,
-          base_price,
-          material,
-          style,
-          image_url
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (category) {
-        // Add category filtering if needed - ensure proper type casting
-        query = query.eq('material', category as 'wood' | 'metal' | 'acrylic' | 'composite');
+        query = query.eq('category', category);
       }
 
       const { data, error } = await query;
@@ -75,8 +66,7 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
       const productsWithMockData = (data || []).map(product => ({
         ...product,
         average_rating: 4.0 + (Math.random() * 1.0), // 4.0-5.0 stars
-        review_count: Math.floor(Math.random() * 50) + 10, // 10-60 reviews
-        product_images: [] // Empty array for now
+        review_count: Math.floor(Math.random() * 50) + 10 // 10-60 reviews
       }));
       
       setProducts(productsWithMockData);
@@ -95,9 +85,8 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
     setCurrentIndex(prev => prev <= 0 ? products.length - 1 : prev - 1);
   };
 
-  const getProductImage = (product: Product) => {
-    const primaryImage = product.product_images?.find(img => img.is_primary);
-    return primaryImage?.image_url || product.image_url || frameCollection;
+  const getProductImage = () => {
+    return frameCollection;
   };
 
   const handleProductClick = (productId: string) => {
@@ -156,7 +145,7 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
           >
             <div className="relative aspect-square overflow-hidden rounded-t-lg">
               <img
-                src={getProductImage(product)}
+                src={getProductImage()}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
               />
@@ -164,7 +153,7 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
                 variant="secondary" 
                 className="absolute top-2 left-2 text-xs"
               >
-                {product.style}
+                {product.category || 'Frame'}
               </Badge>
             </div>
             
@@ -195,7 +184,7 @@ export const ProductCarouselSimple: React.FC<ProductCarouselSimpleProps> = ({
               
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
-                  {product.material}
+                  {product.category || 'Frame'}
                 </span>
                 <span className="font-bold text-sm">
                   {formatPrice(product.base_price)}

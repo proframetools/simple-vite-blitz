@@ -12,11 +12,12 @@ import frameCollection from "@/assets/frame-collection.jpg";
 interface Product {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export const ProductGrid = () => {
@@ -88,11 +89,11 @@ export const ProductGrid = () => {
             <Card key={product.id} className="group hover:shadow-hover transition-smooth overflow-hidden">
               <div className="relative aspect-square overflow-hidden">
                 <Link to={`/product/${product.id}`}>
-                  <img
-                    src={product.image_url || frameCollection}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                  />
+                <img
+                  src={frameCollection}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                />
                 </Link>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
                 <div className="absolute top-4 right-4 flex gap-2">
@@ -107,7 +108,7 @@ export const ProductGrid = () => {
                 </div>
                 <div className="absolute top-4 left-4">
                   <Badge variant="secondary" className="bg-accent text-accent-foreground font-semibold">
-                    {product.style}
+                    {product.category || 'Frame'}
                   </Badge>
                 </div>
               </div>
@@ -124,7 +125,7 @@ export const ProductGrid = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {product.material}
+                      {product.category || 'Frame'}
                     </Badge>
                   </div>
                   <span className="text-2xl font-bold text-foreground">

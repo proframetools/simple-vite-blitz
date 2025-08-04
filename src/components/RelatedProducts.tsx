@@ -11,12 +11,12 @@ import frameCollection from "@/assets/frame-collection.jpg";
 interface Product {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  average_rating: number;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface RelatedProductsProps {
@@ -81,11 +81,11 @@ const RelatedProducts = ({ currentProductId }: RelatedProductsProps) => {
           <Card key={product.id} className="group hover:shadow-hover transition-smooth overflow-hidden">
             <Link to={`/product/${product.id}`}>
               <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={product.image_url || frameCollection}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                />
+              <img
+                src={frameCollection}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+              />
                 <div className="absolute top-2 right-2">
                   <Button size="icon" variant="secondary" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-smooth">
                     <Heart className="h-4 w-4" />
@@ -93,7 +93,7 @@ const RelatedProducts = ({ currentProductId }: RelatedProductsProps) => {
                 </div>
                 <div className="absolute top-2 left-2">
                   <Badge variant="secondary" className="text-xs">
-                    {product.style}
+                    {product.category || 'Frame'}
                   </Badge>
                 </div>
               </div>
@@ -110,7 +110,7 @@ const RelatedProducts = ({ currentProductId }: RelatedProductsProps) => {
               </p>
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-xs">
-                  {product.material}
+                  {product.category || 'Frame'}
                 </Badge>
                 <span className="font-bold text-foreground">
                   ${product.base_price}
