@@ -106,19 +106,14 @@ const VariantManager = () => {
       setColors(colorsRes.data || []);
       setMattingOptions(mattingRes.data || []);
 
-      // Temporarily set default data for new tables until types are updated
-      setAspectRatios([
-        { id: '1', name: '3:2', ratio_value: 1.5, is_active: true },
-        { id: '2', name: '4:3', ratio_value: 1.333, is_active: true },
-        { id: '3', name: '1:1', ratio_value: 1.0, is_active: true },
-        { id: '4', name: '16:9', ratio_value: 1.778, is_active: true }
+      // Load new variant system tables
+      const [aspectRatiosRes, orientationsRes] = await Promise.all([
+        supabase.from('aspect_ratios').select('*').eq('is_active', true),
+        supabase.from('frame_orientations').select('*').eq('is_active', true)
       ]);
-      
-      setOrientations([
-        { id: '1', name: 'Landscape', code: 'landscape', is_active: true },
-        { id: '2', name: 'Portrait', code: 'portrait', is_active: true },
-        { id: '3', name: 'Square', code: 'square', is_active: true }
-      ]);
+
+      setAspectRatios(aspectRatiosRes.data || []);
+      setOrientations(orientationsRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load variant options');
@@ -128,14 +123,47 @@ const VariantManager = () => {
   };
 
   const loadVariants = async () => {
+    if (!selectedProduct) return;
+    
     try {
-      // For now, show empty variants list until types are updated
-      // This will be properly implemented once Supabase types are regenerated
-      setVariants([]);
-      toast.info('Variant management will be available after database types are updated');
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select(`
+          *,
+          product:products(name),
+          aspect_ratio:aspect_ratios(name, display_name),
+          orientation:frame_orientations(name, display_name),
+          size:frame_sizes(name, display_name),
+          color:frame_colors(name, display_name),
+          thickness:frame_thickness(name, display_name),
+          matting:matting_options(name, display_name)
+        `)
+        .eq('product_id', selectedProduct)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      
+      // Transform the data to match our interface
+      const transformedVariants: ProductVariant[] = (data || []).map(variant => ({
+        ...variant,
+        aspect_ratio_name: variant.aspect_ratio?.name,
+        orientation_name: variant.orientation?.name,
+        size_name: variant.size?.display_name,
+        color_name: variant.color?.display_name,
+        thickness_name: variant.thickness?.display_name,
+        matting_name: variant.matting?.display_name,
+        product_name: variant.product?.name,
+        price_override: variant.price_adjustment
+      }));
+      
+      setVariants(transformedVariants);
     } catch (error) {
       console.error('Error loading variants:', error);
-      toast.error('Failed to load variants');
+      toast({
+        title: "Error",
+        description: "Failed to load product variants",
+        variant: "destructive",
+      });
     }
   };
 
@@ -151,8 +179,37 @@ const VariantManager = () => {
       
       const sku = `${product?.name?.substring(0, 3).toUpperCase()}-${aspectRatio?.name}-${color?.name?.substring(0, 3).toUpperCase()}-${thickness?.name?.substring(0, 3).toUpperCase()}`.replace(/\s+/g, '');
 
-      // Temporarily disabled until types are updated
-      toast.info('Variant creation will be available after database types are updated');
+      // Create the variant
+      const variantData = {
+        product_id: formData.product_id,
+        aspect_ratio_id: formData.aspect_ratio_id,
+        orientation_id: formData.orientation_id,
+        size_id: formData.size_id,
+        color_id: formData.color_id,
+        thickness_id: formData.thickness_id,
+        matting_id: formData.matting_id || null,
+        sku: sku,
+        price_adjustment: formData.price_override || 0,
+        stock_quantity: formData.stock_quantity,
+        is_active: formData.is_active
+      };
+
+      if (editingVariant) {
+        const { error } = await supabase
+          .from('product_variants')
+          .update(variantData)
+          .eq('id', editingVariant.id);
+        
+        if (error) throw error;
+        toast.success('Variant updated successfully');
+      } else {
+        const { error } = await supabase
+          .from('product_variants')
+          .insert(variantData);
+        
+        if (error) throw error;
+        toast.success('Variant created successfully');
+      }
 
       setIsDialogOpen(false);
       setEditingVariant(null);
@@ -184,8 +241,15 @@ const VariantManager = () => {
     if (!confirm('Are you sure you want to delete this variant?')) return;
 
     try {
-      // Temporarily disabled until types are updated
-      toast.info('Variant deletion will be available after database types are updated');
+      const { error } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('id', variantId);
+
+      if (error) throw error;
+      
+      toast.success('Variant deleted successfully');
+      loadVariants();
     } catch (error: any) {
       toast.error(error.message);
     }

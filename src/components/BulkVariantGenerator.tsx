@@ -68,22 +68,15 @@ const BulkVariantGenerator: React.FC<{ productId: string }> = ({ productId }) =>
         supabase.from('matting_options').select('*').eq('is_active', true)
       ]);
 
+      // Load new variant system tables  
+      const [aspectRatiosRes, orientationsRes] = await Promise.all([
+        supabase.from('aspect_ratios').select('*').eq('is_active', true),
+        supabase.from('frame_orientations').select('*').eq('is_active', true)
+      ]);
+
       setAvailableOptions({
-        aspectRatios: [
-          { id: '1', name: '3:2', ratio_value: 1.5 },
-          { id: '2', name: '4:3', ratio_value: 1.333 },
-          { id: '3', name: '5:4', ratio_value: 1.25 },
-          { id: '4', name: '1:1', ratio_value: 1.0 },
-          { id: '5', name: '7:5', ratio_value: 1.4 },
-          { id: '6', name: '16:9', ratio_value: 1.778 },
-          { id: '7', name: '2:1', ratio_value: 2.0 },
-          { id: '8', name: '3:1', ratio_value: 3.0 }
-        ],
-        orientations: [
-          { id: '1', name: 'Landscape', code: 'landscape' },
-          { id: '2', name: 'Portrait', code: 'portrait' },
-          { id: '3', name: 'Square', code: 'square' }
-        ],
+        aspectRatios: aspectRatiosRes.data || [],
+        orientations: orientationsRes.data || [],
         sizes: sizesRes.data || [],
         colors: colorsRes.data || [],
         thicknesses: thicknessRes.data || [],
