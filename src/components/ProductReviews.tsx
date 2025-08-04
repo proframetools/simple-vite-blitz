@@ -32,15 +32,9 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
   const fetchReviews = async () => {
     try {
-      const { data, error } = await supabase
-        .from('product_reviews')
-        .select('*')
-        .eq('product_id', productId)
-        .eq('is_approved', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setReviews(data || []);
+      // Temporarily return empty array since product_reviews table doesn't exist
+      const data: any[] = [];
+      setReviews(data);
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {

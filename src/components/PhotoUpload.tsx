@@ -100,23 +100,16 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   };
 
   const savePhotoMetadata = async (photo: UploadedPhoto, url: string, dimensions: { width: number; height: number }) => {
-    const { data, error } = await supabase
-      .from('uploaded_photos')
-      .insert({
-        session_id: sessionId,
-        file_name: photo.file.name,
-        file_size: photo.file.size,
-        file_type: photo.file.type,
-        width_pixels: dimensions.width,
-        height_pixels: dimensions.height,
-        storage_path: url,
-        is_processed: true
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    // For now, we'll skip saving photo metadata to database since uploaded_photos table doesn't exist
+    // This functionality can be added later if needed
+    console.log('Photo uploaded:', {
+      sessionId,
+      fileName: photo.file.name,
+      fileSize: photo.file.size,
+      fileType: photo.file.type,
+      dimensions,
+      url
+    });
   };
 
   const processFile = async (file: File) => {
@@ -181,7 +174,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       // Create the photo data object that will be passed to parent
       const uploadedPhotoData = {
-        id: photoData.id,
+        id: photoId,
         url,
         fileName: file.name,
         width: dimensions.width,

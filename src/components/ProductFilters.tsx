@@ -33,19 +33,11 @@ export default function ProductFilters({ filters, onFiltersChange }: ProductFilt
 
   const fetchFilterData = async () => {
     try {
-      // Fetch categories
-      const { data: categoriesData } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-
-      // Fetch occasions
-      const { data: occasionsData } = await supabase
-        .from('occasions')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
+      // Get categories from products
+      const { data: products } = await supabase
+        .from('products')
+        .select('category')
+        .eq('is_active', true);
 
       // Get unique materials from products
       const { data: productsData } = await supabase
@@ -60,12 +52,11 @@ export default function ProductFilters({ filters, onFiltersChange }: ProductFilt
         .eq('is_active', true)
         .order('base_price');
 
-      if (categoriesData) setCategories(categoriesData);
-      if (occasionsData) setOccasions(occasionsData);
-      
-      if (productsData) {
-        const uniqueMaterials = [...new Set(productsData.map(p => p.material))];
-        setMaterials(uniqueMaterials);
+      if (products) {
+        const uniqueCategories = Array.from(new Set(
+          products.map(p => p.category).filter(Boolean)
+        )) as string[];
+        setCategories(uniqueCategories.map(cat => ({ id: cat, name: cat })));
       }
 
       if (priceData && priceData.length > 0) {

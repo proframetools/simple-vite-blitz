@@ -1,81 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Loader2, Star, Heart, ShoppingCart, Eye, Filter } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import ProductFilters from './ProductFilters';
-import ProductSearch from './ProductSearch';
-import frameCollection from '@/assets/frame-collection.jpg';
-import { WhatsAppButton } from '@/components/ui/whatsapp-button';
+import { Star, Filter, Search, Heart, ShoppingCart, Zap } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 import { openWhatsAppInquiry } from '@/lib/whatsapp';
 import { formatPrice, PRICE_RANGES } from '@/lib/currency';
+import { Database } from '@/integrations/supabase/types';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  stock_quantity: number | null;
-  average_rating: number | null;
-  review_count: number | null;
-  popularity_score: number | null;
-  created_at?: string;
-  product_images?: Array<{
-    image_url: string;
-    alt_text: string | null;
-    is_primary: boolean;
-    sort_order: number;
-  }>;
+// Use database types
+type Product = Database['public']['Tables']['products']['Row'];
+
+interface EnhancedProductGridProps {
+  category?: string;
+  searchQuery?: string;
+  priceRange?: string;
+  sortBy?: string;
+  itemsPerPage?: number;
+  showFilters?: boolean;
 }
 
-interface FilterState {
-  categories: string[];
-  occasions: string[];
-  materials: string[];
-  priceRange: [number, number];
-  inStock: boolean;
-  minRating: number;
-}
-
-type SortOption = 'popularity' | 'price_low' | 'price_high' | 'newest' | 'rating' | 'name';
-
-export default function EnhancedProductGrid() {
+const EnhancedProductGrid: React.FC<EnhancedProductGridProps> = ({
+  category,
+  searchQuery = '',
+  priceRange,
+  sortBy = 'name',
+  itemsPerPage = 12,
+  showFilters = true
+}) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('popularity');
-  const [wishlist, setWishlist] = useState<string[]>([]);
-  const [filters, setFilters] = useState<FilterState>({
-    categories: [],
-    occasions: [],
-    materials: [],
-    priceRange: [PRICE_RANGES.DEFAULT_MIN, PRICE_RANGES.DEFAULT_MAX],
-    inStock: false,
-    minRating: 0,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const [localCategory, setLocalCategory] = useState(category || '');
+  const [localPriceRange, setLocalPriceRange] = useState(priceRange || '');
+  const [localSortBy, setLocalSortBy] = useState(sortBy);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchProducts();
-    loadWishlist();
-  }, []);
-
-  useEffect(() => {
-    applyFiltersAndSort();
-  }, [products, filters, searchQuery, sortBy]);
+  }, [localCategory, localSearchQuery, localPriceRange, localSortBy, currentPage]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
       
-      // Simple query that works with existing database schema
       let query = supabase
         .from('products')
         .select('*')
@@ -93,330 +66,311 @@ export default function EnhancedProductGrid() {
     }
   };
 
-  const loadWishlist = () => {
-    const saved = localStorage.getItem('wishlist');
-    if (saved) {
-      setWishlist(JSON.parse(saved));
-    }
+  const handleProductClick = (product: Product) => {
+    window.location.href = `/product/${product.id}`;
   };
 
-  const toggleWishlist = useCallback((productId: string, productName: string) => {
-    const newWishlist = wishlist.includes(productId)
-      ? wishlist.filter(id => id !== productId)
-      : [...wishlist, productId];
-    
-    setWishlist(newWishlist);
-    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-    
-    toast.success(
-      wishlist.includes(productId)
-        ? `${productName} removed from wishlist`
-        : `${productName} added to wishlist`
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // For now, open WhatsApp inquiry
+    openWhatsAppInquiry(
+      `I'm interested in ordering the ${product.name}. Can you help me with customization options and pricing?`
     );
-  }, [wishlist]);
+  };
 
-  const applyFiltersAndSort = useCallback(() => {
-    let filtered = [...products];
-
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description?.toLowerCase().includes(query) ||
-        product.material.toLowerCase().includes(query) ||
-        product.style.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply material filter
-    if (filters.materials.length > 0) {
-      filtered = filtered.filter(product =>
-        filters.materials.includes(product.material)
-      );
-    }
-
-    // Apply price range filter
-    filtered = filtered.filter(product =>
-      product.base_price >= filters.priceRange[0] &&
-      product.base_price <= filters.priceRange[1]
-    );
-
-    // Apply stock filter
-    if (filters.inStock) {
-      filtered = filtered.filter(product =>
-        product.stock_quantity && product.stock_quantity > 0
-      );
-    }
-
-    // Apply rating filter
-    if (filters.minRating > 0) {
-      filtered = filtered.filter(product =>
-        product.average_rating && product.average_rating >= filters.minRating
-      );
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'popularity':
-          return (b.popularity_score || 0) - (a.popularity_score || 0);
-        case 'price_low':
-          return a.base_price - b.base_price;
-        case 'price_high':
-          return b.base_price - a.base_price;
-        case 'rating':
-          return (b.average_rating || 0) - (a.average_rating || 0);
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'newest':
-        default:
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  const toggleFavorite = (productId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(productId)) {
+        newFavorites.delete(productId);
+        toast.success('Removed from favorites');
+      } else {
+        newFavorites.add(productId);
+        toast.success('Added to favorites');
       }
+      return newFavorites;
     });
-
-    setFilteredProducts(filtered);
-  }, [products, filters, searchQuery, sortBy]);
-
-  const handleAddToCart = (productId: string, productName: string) => {
-    toast.success(`${productName} added to cart!`);
-    // TODO: Implement cart functionality
   };
 
-  const renderStars = (rating: number | null) => {
-    if (!rating) return null;
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`h-3 w-3 ${
-              i < Math.floor(rating)
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-muted-foreground'
-            }`}
-          />
-        ))}
-        <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
+  const filteredProducts = products.filter(product => {
+    // Search filter
+    if (localSearchQuery && !product.name.toLowerCase().includes(localSearchQuery.toLowerCase()) &&
+        !product.description?.toLowerCase().includes(localSearchQuery.toLowerCase()) &&
+        !product.category?.toLowerCase().includes(localSearchQuery.toLowerCase())) {
+      return false;
+    }
 
-  const getProductImage = (product: Product) => {
-    // Use primary image if available, otherwise use product.image_url or fallback
-    const primaryImage = product.product_images?.find(img => img.is_primary);
-    return primaryImage?.image_url || product.image_url || frameCollection;
-  };
+    // Category filter
+    if (localCategory && product.category !== localCategory) {
+      return false;
+    }
+
+    // Price range filter
+    if (localPriceRange) {
+      const range = PRICE_RANGES.RANGES.find(r => r.label === localPriceRange);
+      if (range && (product.base_price < range.min || (range.max && product.base_price > range.max))) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (localSortBy) {
+      case 'price_low':
+        return a.base_price - b.base_price;
+      case 'price_high':
+        return b.base_price - a.base_price;
+      case 'name':
+      default:
+        return a.name.localeCompare(b.name);
+    }
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
   if (loading) {
     return (
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+      <div className="space-y-6">
+        {showFilters && (
+          <Card className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <Skeleton key={i} className="h-10" />
+              ))}
+            </div>
+          </Card>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="aspect-square" />
+              <CardContent className="p-4 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-8 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section id="products" className="py-20 bg-background">
-      <div className="container mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Our Frame Collection
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Discover our curated selection of premium photo frames, each designed 
-            to perfectly complement your cherished memories.
-          </p>
-        </div>
-
-        {/* Search and Filter Controls */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          <ProductSearch
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-          
-          <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+    <div className="space-y-6">
+      {/* Filters */}
+      {showFilters && (
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search products..."
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={localCategory} onValueChange={setLocalCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="popularity">Most Popular</SelectItem>
-                <SelectItem value="price_low">Price: Low to High</SelectItem>
-                <SelectItem value="price_high">Price: High to Low</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="name">Name A-Z</SelectItem>
+                <SelectItem value="">All Categories</SelectItem>
+                {categories.map(cat => (
+                  <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="lg:hidden">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetTitle>Filters</SheetTitle>
-                <div className="mt-6">
-                  <ProductFilters filters={filters} onFiltersChange={setFilters} />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <Select value={localPriceRange} onValueChange={setLocalPriceRange}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Prices" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Prices</SelectItem>
+                {PRICE_RANGES.RANGES.map(range => (
+                  <SelectItem key={range.label} value={range.label}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={localSortBy} onValueChange={setLocalSortBy}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Name A-Z</SelectItem>
+                <SelectItem value="price_low">Price: Low to High</SelectItem>
+                <SelectItem value="price_high">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
+        </Card>
+      )}
 
-        <div className="flex gap-8">
-          {/* Desktop Filters Sidebar */}
-          <div className="hidden lg:block w-80 shrink-0">
-            <div className="sticky top-6">
-              <ProductFilters filters={filters} onFiltersChange={setFilters} />
+      {/* Results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, sortedProducts.length)} of {sortedProducts.length} products
+        </p>
+        {filteredProducts.length !== products.length && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLocalSearchQuery('');
+              setLocalCategory('');
+              setLocalPriceRange('');
+              setCurrentPage(1);
+            }}
+          >
+            Clear Filters
+          </Button>
+        )}
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {paginatedProducts.map((product) => (
+          <Card
+            key={product.id}
+            className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+            onClick={() => handleProductClick(product)}
+          >
+            <div className="relative aspect-square bg-muted overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+              
+              {/* Favorite button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`absolute top-2 right-2 h-8 w-8 p-0 bg-white/80 hover:bg-white z-10 ${
+                  favorites.has(product.id) ? 'text-red-500' : 'text-muted-foreground'
+                }`}
+                onClick={(e) => toggleFavorite(product.id, e)}
+              >
+                <Heart className={`h-4 w-4 ${favorites.has(product.id) ? 'fill-current' : ''}`} />
+              </Button>
+
+              {/* Product badge */}
+              <div className="absolute top-2 left-2">
+                <Badge variant="secondary" className="bg-white/90">
+                  Frame
+                </Badge>
+              </div>
+
+              {/* Placeholder for product image */}
+              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <span className="text-4xl font-bold text-primary/30">
+                  {product.name.substring(0, 2).toUpperCase()}
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Products Grid */}
-          <div className="flex-1">
-            <div className="mb-4 text-sm text-muted-foreground">
-              Showing {filteredProducts.length} of {products.length} products
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="group hover:shadow-hover transition-smooth overflow-hidden">
-                  <div className="relative aspect-square overflow-hidden">
-                    <img
-                      src={getProductImage(product)}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
-                    
-                    {/* Action Buttons */}
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      <Button 
-                        size="icon" 
-                        variant="secondary" 
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-smooth"
-                        onClick={() => toggleWishlist(product.id, product.name)}
-                      >
-                        <Heart className={`h-4 w-4 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                      </Button>
-                      <Button 
-                        size="icon" 
-                        variant="secondary" 
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-smooth"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
+            <CardContent className="p-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
+                
+                {product.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {product.description}
+                  </p>
+                )}
 
-                    {/* Badges */}
-                    <div className="absolute top-4 left-4 flex flex-col gap-2">
-                      <Badge variant="secondary" className="bg-accent text-accent-foreground font-semibold">
-                        {product.style}
-                      </Badge>
-                      {product.stock_quantity && product.stock_quantity <= 5 && (
-                        <Badge variant="destructive" className="text-xs">
-                          Only {product.stock_quantity} left
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold text-foreground mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                    
-                    {/* Rating */}
-                    {product.average_rating && (
-                      <div className="mb-3">
-                        {renderStars(product.average_rating)}
-                        {product.review_count && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({product.review_count} reviews)
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {product.material}
-                        </Badge>
-                      </div>
-                      <span className="text-2xl font-bold text-foreground">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl font-bold text-primary">
                         {formatPrice(product.base_price)}
                       </span>
                     </div>
-                  </CardContent>
-                  
-                  <CardFooter className="p-6 pt-0">
-                    <div className="flex gap-2 w-full">
-                      <Button 
-                        variant="elegant" 
-                        className="flex-1"
-                        onClick={() => handleAddToCart(product.id, product.name)}
-                        disabled={product.stock_quantity === 0}
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-                      </Button>
-                      <Button variant="premium" className="flex-1">
-                        Customize
-                      </Button>
-                    </div>
-                    <div className="mt-3 w-full">
-                      <WhatsAppButton 
-                        onClick={() => openWhatsAppInquiry(product.name)}
-                        size="sm"
-                        className="w-full"
-                      >
-                        Quick WhatsApp Inquiry
-                      </WhatsAppButton>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+                    <p className="text-xs text-muted-foreground">Starting price</p>
+                  </div>
+                </div>
 
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-xl text-muted-foreground mb-4">
-                  No products found matching your criteria.
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                                      setFilters({
-                    categories: [],
-                    occasions: [],
-                    materials: [],
-                    priceRange: [PRICE_RANGES.DEFAULT_MIN, PRICE_RANGES.DEFAULT_MAX],
-                    inStock: false,
-                    minRating: 0,
-                  });
-                    setSearchQuery('');
-                  }}
-                >
-                  Clear all filters
-                </Button>
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={(e) => handleAddToCart(product, e)}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Order Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProductClick(product);
+                    }}
+                  >
+                    <Zap className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {paginatedProducts.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <div className="text-muted-foreground space-y-2">
+            <Filter className="h-12 w-12 mx-auto" />
+            <h3 className="text-lg font-medium">No products found</h3>
+            <p>Try adjusting your filters or search terms.</p>
           </div>
         </div>
-      </div>
-    </section>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => prev - 1)}
+          >
+            Previous
+          </Button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <Button
+              key={page}
+              variant={currentPage === page ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </Button>
+          ))}
+          
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
+export default EnhancedProductGrid;
