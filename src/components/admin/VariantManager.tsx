@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import AdminLayout from './AdminLayout';
 
 interface ProductVariant {
   id: string;
@@ -270,230 +271,232 @@ const VariantManager = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Product Variants</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={!selectedProduct} onClick={resetForm}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Variant
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingVariant ? 'Edit Variant' : 'Create New Variant'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="aspect_ratio_id">Aspect Ratio</Label>
-                  <Select value={formData.aspect_ratio_id} onValueChange={(value) => setFormData({...formData, aspect_ratio_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select aspect ratio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {aspectRatios.map(ratio => (
-                        <SelectItem key={ratio.id} value={ratio.id}>{ratio.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+    <AdminLayout>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Product Variants</h1>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={!selectedProduct} onClick={resetForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Variant
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingVariant ? 'Edit Variant' : 'Create New Variant'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="aspect_ratio_id">Aspect Ratio</Label>
+                    <Select value={formData.aspect_ratio_id} onValueChange={(value) => setFormData({...formData, aspect_ratio_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select aspect ratio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {aspectRatios.map(ratio => (
+                          <SelectItem key={ratio.id} value={ratio.id}>{ratio.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="orientation_id">Orientation</Label>
+                    <Select value={formData.orientation_id} onValueChange={(value) => setFormData({...formData, orientation_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select orientation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {orientations.map(orientation => (
+                          <SelectItem key={orientation.id} value={orientation.id}>{orientation.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="size_id">Size</Label>
+                    <Select value={formData.size_id} onValueChange={(value) => setFormData({...formData, size_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sizes.map(size => (
+                          <SelectItem key={size.id} value={size.id}>{size.display_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="thickness_id">Thickness</Label>
+                    <Select value={formData.thickness_id} onValueChange={(value) => setFormData({...formData, thickness_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select thickness" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {thicknesses.map(thickness => (
+                          <SelectItem key={thickness.id} value={thickness.id}>{thickness.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="color_id">Color</Label>
+                    <Select value={formData.color_id} onValueChange={(value) => setFormData({...formData, color_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select color" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {colors.map(color => (
+                          <SelectItem key={color.id} value={color.id}>{color.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="matting_id">Matting (Optional)</Label>
+                    <Select value={formData.matting_id || ''} onValueChange={(value) => setFormData({...formData, matting_id: value || undefined})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select matting" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No Matting</SelectItem>
+                        {mattingOptions.map(matting => (
+                          <SelectItem key={matting.id} value={matting.id}>{matting.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="price_override">Price Override</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.price_override || ''}
+                      onChange={(e) => setFormData({...formData, price_override: e.target.value ? Number(e.target.value) : undefined})}
+                      placeholder="Optional price override"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="stock_quantity">Stock Quantity</Label>
+                    <Input
+                      type="number"
+                      value={formData.stock_quantity}
+                      onChange={(e) => setFormData({...formData, stock_quantity: Number(e.target.value)})}
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="orientation_id">Orientation</Label>
-                  <Select value={formData.orientation_id} onValueChange={(value) => setFormData({...formData, orientation_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select orientation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orientations.map(orientation => (
-                        <SelectItem key={orientation.id} value={orientation.id}>{orientation.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="size_id">Size</Label>
-                  <Select value={formData.size_id} onValueChange={(value) => setFormData({...formData, size_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sizes.map(size => (
-                        <SelectItem key={size.id} value={size.id}>{size.display_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="thickness_id">Thickness</Label>
-                  <Select value={formData.thickness_id} onValueChange={(value) => setFormData({...formData, thickness_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select thickness" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {thicknesses.map(thickness => (
-                        <SelectItem key={thickness.id} value={thickness.id}>{thickness.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="color_id">Color</Label>
-                  <Select value={formData.color_id} onValueChange={(value) => setFormData({...formData, color_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select color" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colors.map(color => (
-                        <SelectItem key={color.id} value={color.id}>{color.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="matting_id">Matting (Optional)</Label>
-                  <Select value={formData.matting_id || ''} onValueChange={(value) => setFormData({...formData, matting_id: value || undefined})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select matting" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No Matting</SelectItem>
-                      {mattingOptions.map(matting => (
-                        <SelectItem key={matting.id} value={matting.id}>{matting.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="price_override">Price Override</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.price_override || ''}
-                    onChange={(e) => setFormData({...formData, price_override: e.target.value ? Number(e.target.value) : undefined})}
-                    placeholder="Optional price override"
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    checked={formData.is_active} 
+                    onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
                   />
+                  <Label>Active</Label>
                 </div>
 
-                <div>
-                  <Label htmlFor="stock_quantity">Stock Quantity</Label>
-                  <Input
-                    type="number"
-                    value={formData.stock_quantity}
-                    onChange={(e) => setFormData({...formData, stock_quantity: Number(e.target.value)})}
-                    required
-                  />
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {editingVariant ? 'Update' : 'Create'} Variant
+                  </Button>
                 </div>
-              </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  checked={formData.is_active} 
-                  onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-                />
-                <Label>Active</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingVariant ? 'Update' : 'Create'} Variant
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Product Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Product</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose a product to manage variants" />
-            </SelectTrigger>
-            <SelectContent>
-              {products.map(product => (
-                <SelectItem key={product.id} value={product.id}>
-                  {product.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Variants Table */}
-      {selectedProduct && (
+        {/* Product Selection */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Product Variants ({variants.length})
-            </CardTitle>
+            <CardTitle>Select Product</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Ratio</TableHead>
-                  <TableHead>Orientation</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Color</TableHead>
-                  <TableHead>Thickness</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {variants.map(variant => (
-                  <TableRow key={variant.id}>
-                    <TableCell className="font-mono text-sm">{variant.sku}</TableCell>
-                    <TableCell>{variant.aspect_ratio_name}</TableCell>
-                    <TableCell>{variant.orientation_name}</TableCell>
-                    <TableCell>{variant.size_name}</TableCell>
-                    <TableCell>{variant.color_name}</TableCell>
-                    <TableCell>{variant.thickness_name}</TableCell>
-                    <TableCell>{variant.stock_quantity}</TableCell>
-                    <TableCell>
-                      <Badge variant={variant.is_active ? 'default' : 'secondary'}>
-                        {variant.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(variant)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDelete(variant.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+            <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose a product to manage variants" />
+              </SelectTrigger>
+              <SelectContent>
+                {products.map(product => (
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name}
+                  </SelectItem>
                 ))}
-              </TableBody>
-            </Table>
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
-      )}
-    </div>
+
+        {/* Variants Table */}
+        {selectedProduct && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Product Variants ({variants.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Ratio</TableHead>
+                    <TableHead>Orientation</TableHead>
+                    <TableHead>Size</TableHead>
+                    <TableHead>Color</TableHead>
+                    <TableHead>Thickness</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {variants.map(variant => (
+                    <TableRow key={variant.id}>
+                      <TableCell className="font-mono text-sm">{variant.sku}</TableCell>
+                      <TableCell>{variant.aspect_ratio_name}</TableCell>
+                      <TableCell>{variant.orientation_name}</TableCell>
+                      <TableCell>{variant.size_name}</TableCell>
+                      <TableCell>{variant.color_name}</TableCell>
+                      <TableCell>{variant.thickness_name}</TableCell>
+                      <TableCell>{variant.stock_quantity}</TableCell>
+                      <TableCell>
+                        <Badge variant={variant.is_active ? 'default' : 'secondary'}>
+                          {variant.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(variant)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDelete(variant.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </AdminLayout>
   );
 };
 

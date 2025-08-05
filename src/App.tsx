@@ -40,6 +40,14 @@ const App = () => (
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/occasion/:slug" element={<OccasionPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminRouter />} />
+          <Route path="/admin/dashboard" element={<AdminRouter />} />
+          <Route path="/admin/products" element={<AdminRouter />} />
+          <Route path="/admin/variants" element={<AdminRouter />} />
+          <Route path="/admin/frame-colors" element={<AdminRouter />} />
+          <Route path="/admin/frame-sizes" element={<AdminRouter />} />
+          <Route path="/admin/preview-images" element={<AdminRouter />} />
+          <Route path="/admin/orders" element={<AdminRouter />} />
           <Route path="/admin/*" element={<AdminRouter />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

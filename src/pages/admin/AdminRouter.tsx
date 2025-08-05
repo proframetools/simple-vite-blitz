@@ -19,6 +19,13 @@ const AdminRouter = () => {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    // Redirect /admin to /admin/dashboard
+    if (location.pathname === '/admin') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
   const checkAuth = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -68,6 +75,7 @@ const AdminRouter = () => {
       case '/admin/orders':
         return <OrderManager />;
       case '/admin/dashboard':
+      case '/admin':
       default:
         return <AdminDashboard />;
     }
