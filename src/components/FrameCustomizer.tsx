@@ -27,6 +27,7 @@ interface FrameCustomizerProps {
     thickness: FrameThickness | null;
     matting: MattingOption | null;
   }) => void;
+  onAddToCart?: (customization: any) => void;
 }
 
 const FrameCustomizer: React.FC<FrameCustomizerProps> = ({ 

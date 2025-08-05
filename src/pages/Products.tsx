@@ -1,36 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import ProductFilters from "@/components/ProductFilters";
 import ProductSearch from "@/components/ProductSearch";
+import ProductFilters from "@/components/ProductFilters";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, ShoppingCart, Eye, Star, Filter, Loader2 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Heart, ShoppingCart, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from 'react-router-dom';
 import { formatPrice } from "@/lib/currency";
 import { openWhatsAppInquiry } from "@/lib/whatsapp";
 import { WhatsAppButton } from "@/components/ui/whatsapp-button";
 import frameCollection from "@/assets/frame-collection.jpg";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  average_rating: number;
-  review_count: number;
-  stock_quantity: number | null;
-  popularity_score: number | null;
-  created_at?: string;
-}
+import { Product } from "@/lib/types";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -50,13 +34,33 @@ const Products = () => {
     try {
       const { data: productsData, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          id,
+          name,
+          description,
+          base_price,
+          category,
+          is_active,
+          created_at,
+          updated_at
+        `)
         .eq('is_active', true)
-        .order('popularity_score', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProducts(productsData || []);
-      setFilteredProducts(productsData || []);
+      
+      // Transform the data to match the Product interface
+      const transformedProducts: Product[] = (productsData || []).map(product => ({
+        ...product,
+        material: null,
+        style: null,
+        image_url: null,
+        average_rating: null,
+        review_count: null
+      }));
+      
+      setProducts(transformedProducts);
+      setFilteredProducts(transformedProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
@@ -79,11 +83,11 @@ const Products = () => {
         sorted.sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
         break;
       case 'newest':
-        sorted.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime());
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       case 'popularity':
       default:
-        sorted.sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0));
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
     }
     
@@ -98,9 +102,9 @@ const Products = () => {
 
     const filtered = products.filter(product =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.style.toLowerCase().includes(searchTerm.toLowerCase())
+      (product.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (product.material?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (product.style?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
   };

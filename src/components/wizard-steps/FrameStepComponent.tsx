@@ -25,8 +25,14 @@ interface FrameColor {
 interface FrameThickness {
   id: string;
   name: string;
+  display_name: string;
+  thickness_mm: number;
   width_inches: number;
   price_multiplier: number;
+  price_adjustment: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface PopularCombination {

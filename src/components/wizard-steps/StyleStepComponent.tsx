@@ -21,8 +21,9 @@ interface MattingOption {
 interface StyleStepComponentProps {
   wizardData: any;
   onUpdate: (data: any) => void;
-  onNext: () => void;
-  onPrev: () => void;
+  onNext?: () => void;
+  onPrev?: () => void;
+  onPriceUpdate?: (price: number) => void;
 }
 
 const StyleStepComponent: React.FC<StyleStepComponentProps> = ({

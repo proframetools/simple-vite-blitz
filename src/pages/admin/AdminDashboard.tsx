@@ -38,19 +38,17 @@ const AdminDashboard = () => {
     try {
       const [
         { count: productsCount },
-        { count: ordersCount },
-        { count: customersCount }
+        { count: ordersCount }
       ] = await Promise.all([
         supabase.from('products').select('*', { count: 'exact', head: true }),
-        supabase.from('orders').select('*', { count: 'exact', head: true }),
-        supabase.from('uploaded_photos').select('*', { count: 'exact', head: true })
+        supabase.from('orders').select('*', { count: 'exact', head: true })
       ]);
 
       setStats({
         products: productsCount || 0,
         variants: 0, // Will be populated once types are updated
         orders: ordersCount || 0,
-        customers: customersCount || 0
+        customers: 0 // Removed uploaded_photos reference
       });
     } catch (error) {
       console.error('Error loading stats:', error);
