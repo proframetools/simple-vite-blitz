@@ -18,6 +18,14 @@ import CareInstructions from "./pages/CareInstructions";
 import Products from "./pages/Products";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProductManager from "./pages/admin/ProductManager";
+import VariantManagerPage from "./pages/admin/VariantManager";
+import OrderManager from "./pages/admin/OrderManager";
+import PreviewImageManager from "./pages/admin/PreviewImageManager";
+import FrameSizeManager from "./pages/admin/FrameSizeManager";
+import FrameColorManager from "./pages/admin/FrameColorManager";
+import CustomerManager from "./pages/admin/CustomerManager";
+import Settings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +49,14 @@ const App = () => (
           <Route path="/occasion/:slug" element={<OccasionPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<ProductManager />} />
+          <Route path="/admin/variants" element={<VariantManagerPage />} />
+          <Route path="/admin/frame-colors" element={<FrameColorManager />} />
+          <Route path="/admin/frame-sizes" element={<FrameSizeManager />} />
+          <Route path="/admin/preview-images" element={<PreviewImageManager />} />
+          <Route path="/admin/orders" element={<OrderManager />} />
+          <Route path="/admin/customers" element={<CustomerManager />} />
+          <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
