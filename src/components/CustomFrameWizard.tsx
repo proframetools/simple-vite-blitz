@@ -333,7 +333,6 @@ const CustomFrameWizard: React.FC<CustomFrameWizardProps> = ({
       case 'style':
         return (
           <StyleStepComponent
-            product={product}
             wizardData={wizardData}
             onUpdate={updateWizardData}
             onPriceUpdate={(price) => updateWizardData({ totalPrice: price })}

@@ -18,18 +18,6 @@ import FrameCustomizer from "@/components/FrameCustomizer";
 import QuickOrderModal from "@/components/QuickOrderModal";
 import frameCollection from "@/assets/frame-collection.jpg";
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  stock_quantity: number;
-  average_rating: number;
-  review_count: number;
-}
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
