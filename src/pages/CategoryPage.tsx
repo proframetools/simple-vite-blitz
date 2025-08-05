@@ -1,17 +1,17 @@
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import ProductFilters from "@/components/ProductFilters";
 import ProductSearch from "@/components/ProductSearch";
+import ProductFilters from "@/components/ProductFilters";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from 'react-router-dom';
+import { Product } from "@/lib/types";
 import frameCollection from "@/assets/frame-collection.jpg";
 
 interface Category {
@@ -19,18 +19,6 @@ interface Category {
   name: string;
   description: string | null;
   image_url: string | null;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  base_price: number;
-  material: string;
-  style: string;
-  image_url: string | null;
-  average_rating: number;
-  review_count: number;
 }
 
 const CategoryPage = () => {
@@ -63,16 +51,33 @@ const CategoryPage = () => {
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
-          *,
-          product_categories!inner(category_id)
+          id,
+          name,
+          description,
+          base_price,
+          category,
+          is_active,
+          created_at,
+          updated_at
         `)
-        .eq('product_categories.category_id', categoryData.id)
+        .eq('category', categoryData.name)
         .eq('is_active', true)
-        .order('popularity_score', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (productsError) throw productsError;
-      setProducts(productsData || []);
-      setFilteredProducts(productsData || []);
+      
+      // Transform the data to match the Product interface
+      const transformedProducts: Product[] = (productsData || []).map(product => ({
+        ...product,
+        material: null,
+        style: null,
+        image_url: null,
+        average_rating: null,
+        review_count: null
+      }));
+      
+      setProducts(transformedProducts);
+      setFilteredProducts(transformedProducts);
     } catch (error) {
       console.error('Error fetching category data:', error);
       toast.error('Failed to load category');

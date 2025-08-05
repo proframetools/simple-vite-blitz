@@ -5,6 +5,11 @@ export interface Product {
   description: string | null;
   base_price: number;
   category: string | null;
+  material: string | null;
+  style: string | null;
+  image_url: string | null;
+  average_rating: number | null;
+  review_count: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

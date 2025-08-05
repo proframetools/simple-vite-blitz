@@ -17,6 +17,7 @@ import RelatedProducts from "@/components/RelatedProducts";
 import FrameCustomizer from "@/components/FrameCustomizer";
 import QuickOrderModal from "@/components/QuickOrderModal";
 import frameCollection from "@/assets/frame-collection.jpg";
+import { Product } from "@/lib/types";
 
 
 const ProductDetail = () => {
