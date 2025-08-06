@@ -27,12 +27,14 @@ interface FrameCustomizerProps {
     thickness: FrameThickness | null;
     matting: MattingOption | null;
   }) => void;
+  onClose: () => void;
 }
 
 const FrameCustomizer: React.FC<FrameCustomizerProps> = ({ 
   product, 
   onPriceChange,
-  onSelectionChange
+  onSelectionChange,
+  onClose
 }) => {
   const [loading, setLoading] = useState(true);
   const [sizes, setSizes] = useState<FrameSize[]>([]);

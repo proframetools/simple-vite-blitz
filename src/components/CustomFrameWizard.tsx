@@ -335,7 +335,8 @@ const CustomFrameWizard: React.FC<CustomFrameWizardProps> = ({
           <StyleStepComponent
             wizardData={wizardData}
             onUpdate={updateWizardData}
-            onPriceUpdate={(price) => updateWizardData({ totalPrice: price })}
+            onNext={nextStep}
+            onPrev={prevStep}
           />
         );
       case 'review':

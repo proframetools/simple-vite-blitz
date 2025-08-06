@@ -52,23 +52,20 @@ const CategoryPage = () => {
       const { data: categoryData, error: categoryError } = await supabase
         .from('categories')
         .select('*')
-        .eq('slug', slug)
+        .ilike('name', slug.replace('-', ' '))
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (categoryError) throw categoryError;
-      setCategory(categoryData);
+      if (categoryData) setCategory(categoryData);
 
-      // Fetch products in this category
+      // Fetch products directly from products table by category
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select(`
-          *,
-          product_categories!inner(category_id)
-        `)
-        .eq('product_categories.category_id', categoryData.id)
+        .select('*')
+        .ilike('category', slug.replace('-', ' '))
         .eq('is_active', true)
-        .order('popularity_score', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (productsError) throw productsError;
       setProducts(productsData || []);

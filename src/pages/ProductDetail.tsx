@@ -286,7 +286,6 @@ const ProductDetail = () => {
           {product && (
             <FrameCustomizer
               product={product}
-              onAddToCart={handleCustomAddToCart}
               onClose={() => setShowCustomizer(false)}
             />
           )}

@@ -248,6 +248,7 @@ export type Database = {
       matting_options: {
         Row: {
           created_at: string
+          description: string | null
           display_name: string
           id: string
           is_active: boolean
@@ -257,6 +258,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           display_name: string
           id?: string
           is_active?: boolean
@@ -266,6 +268,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           display_name?: string
           id?: string
           is_active?: boolean
@@ -651,7 +654,9 @@ export type Database = {
           is_active: boolean
           material: string | null
           name: string
+          popularity_score: number | null
           review_count: number | null
+          stock_quantity: number | null
           style: string | null
           updated_at: string
         }
@@ -666,7 +671,9 @@ export type Database = {
           is_active?: boolean
           material?: string | null
           name: string
+          popularity_score?: number | null
           review_count?: number | null
+          stock_quantity?: number | null
           style?: string | null
           updated_at?: string
         }
@@ -681,7 +688,9 @@ export type Database = {
           is_active?: boolean
           material?: string | null
           name?: string
+          popularity_score?: number | null
           review_count?: number | null
+          stock_quantity?: number | null
           style?: string | null
           updated_at?: string
         }

@@ -51,23 +51,20 @@ const OccasionPage = () => {
       const { data: occasionData, error: occasionError } = await supabase
         .from('occasions')
         .select('*')
-        .eq('slug', slug)
+        .ilike('name', slug.replace('-', ' '))
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (occasionError) throw occasionError;
-      setOccasion(occasionData);
+      if (occasionData) setOccasion(occasionData);
 
-      // Fetch products for this occasion
+      // For now, show all products since we don't have occasion-product relationships set up yet
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select(`
-          *,
-          product_occasions!inner(occasion_id)
-        `)
-        .eq('product_occasions.occasion_id', occasionData.id)
+        .select('*')
         .eq('is_active', true)
-        .order('popularity_score', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20);
 
       if (productsError) throw productsError;
       setProducts(productsData || []);
