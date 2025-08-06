@@ -5,6 +5,13 @@ export interface Product {
   description: string | null;
   base_price: number;
   category: string | null;
+  material: string | null;
+  style: string | null;
+  image_url: string | null;
+  average_rating: number | null;
+  review_count: number | null;
+  stock_quantity: number | null;
+  popularity_score: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -114,6 +121,8 @@ export interface ThicknessData {
   name: string;
   display_name: string;
   thickness_mm: number;
+  width_inches: number;
+  price_multiplier: number;
   price_adjustment: number | null;
   is_active: boolean;
   created_at: string;

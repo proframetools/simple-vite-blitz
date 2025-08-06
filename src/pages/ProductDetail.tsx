@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Heart, ShoppingCart, Star, ChevronLeft, Share2, Palette, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/lib/types";
 import { toast } from "sonner";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import ProductReviews from "@/components/ProductReviews";
