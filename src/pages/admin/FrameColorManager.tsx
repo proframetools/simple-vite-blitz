@@ -190,20 +190,27 @@ const FrameColorManager: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="hex_code">Color</Label>
+                  <Label htmlFor="hex_code">Color/Material</Label>
                   <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      id="hex_code"
-                      value={formData.hex_code}
-                      onChange={(e) => setFormData({ ...formData, hex_code: e.target.value })}
-                      className="w-16 h-10 rounded border border-border cursor-pointer"
-                    />
+                    {formData.hex_code?.startsWith('/materials/') ? (
+                      <img
+                        src={formData.hex_code}
+                        alt="Material preview"
+                        className="w-16 h-10 rounded border border-border object-cover"
+                      />
+                    ) : (
+                      <input
+                        type="color"
+                        id="hex_code"
+                        value={formData.hex_code}
+                        onChange={(e) => setFormData({ ...formData, hex_code: e.target.value })}
+                        className="w-16 h-10 rounded border border-border cursor-pointer"
+                      />
+                    )}
                     <Input
                       value={formData.hex_code}
                       onChange={(e) => setFormData({ ...formData, hex_code: e.target.value })}
-                      placeholder="#000000"
-                      pattern="^#[0-9A-Fa-f]{6}$"
+                      placeholder="#000000 or /materials/texture.png"
                     />
                   </div>
                 </div>
@@ -269,10 +276,19 @@ const FrameColorManager: React.FC = () => {
                 {filteredColors.map((color) => (
                   <TableRow key={color.id}>
                     <TableCell>
-                      <div
-                        className="w-8 h-8 rounded border border-border"
-                        style={{ backgroundColor: color.hex_code || '#000000' }}
-                      />
+                      {color.hex_code?.startsWith('/materials/') ? (
+                        <img
+                          src={color.hex_code}
+                          alt={color.display_name}
+                          className="w-8 h-8 rounded border border-border object-cover"
+                          style={{ aspectRatio: '1:1' }}
+                        />
+                      ) : (
+                        <div
+                          className="w-8 h-8 rounded border border-border"
+                          style={{ backgroundColor: color.hex_code || '#000000' }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell className="font-medium">{color.name}</TableCell>
                     <TableCell>{color.display_name}</TableCell>

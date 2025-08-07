@@ -273,10 +273,18 @@ const FrameStepComponent: React.FC<FrameStepComponentProps> = ({
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    <div
-                      className="w-full h-12 rounded mb-2 border border-border"
-                      style={{ backgroundColor: color.hex_code }}
-                    />
+                    {color.hex_code?.startsWith('/materials/') ? (
+                      <img
+                        src={color.hex_code}
+                        alt={color.name}
+                        className="w-full h-12 rounded mb-2 border border-border object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-12 rounded mb-2 border border-border"
+                        style={{ backgroundColor: color.hex_code }}
+                      />
+                    )}
                     <div className="text-xs font-medium text-center">{color.name}</div>
                     {color.price_adjustment > 0 && (
                       <div className="text-xs text-muted-foreground text-center mt-1">
@@ -346,7 +354,10 @@ const FrameStepComponent: React.FC<FrameStepComponentProps> = ({
                 style={{
                   width: '200px',
                   height: '250px',
-                  backgroundColor: wizardData.color.hex_code,
+                  backgroundColor: wizardData.color.hex_code?.startsWith('/materials/') ? 'transparent' : wizardData.color.hex_code,
+                  backgroundImage: wizardData.color.hex_code?.startsWith('/materials/') ? `url(${wizardData.color.hex_code})` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'repeat',
                   padding: `${Math.max(8, wizardData.thickness.width_inches * 4)}px`
                 }}
               >

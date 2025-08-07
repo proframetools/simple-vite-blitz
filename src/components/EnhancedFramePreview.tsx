@@ -166,8 +166,24 @@ const EnhancedFramePreview: React.FC<EnhancedFramePreviewProps> = ({
     } else {
       // Fallback to canvas-drawn frame
       // Draw frame background
-      ctx.fillStyle = frameColor;
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      if (frameColor.startsWith('/materials/')) {
+        // Create pattern from material texture if available
+        const materialImg = new Image();
+        materialImg.onload = () => {
+          const pattern = ctx.createPattern(materialImg, 'repeat');
+          if (pattern) {
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+          }
+        };
+        materialImg.src = frameColor;
+        // Fallback to solid color while loading
+        ctx.fillStyle = '#8B4513'; // Brown fallback
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      } else {
+        ctx.fillStyle = frameColor;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      }
       
       // Draw matting if specified
       if (mattingColor) {

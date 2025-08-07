@@ -227,10 +227,18 @@ const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 }`}
                 onClick={() => handleColorSelect(color)}
               >
-                <div
-                  className="w-8 h-8 rounded-full border-2 border-gray-200 mb-1"
-                  style={{ backgroundColor: color.hex_code || '#000000' }}
-                />
+                {color.hex_code?.startsWith('/materials/') ? (
+                  <img
+                    src={color.hex_code}
+                    alt={color.display_name}
+                    className="w-8 h-8 rounded-full border-2 border-gray-200 mb-1 object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-gray-200 mb-1"
+                    style={{ backgroundColor: color.hex_code || '#000000' }}
+                  />
+                )}
                 <span className="text-xs font-medium text-center leading-tight">
                   {color.display_name}
                 </span>
