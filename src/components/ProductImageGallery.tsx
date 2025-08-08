@@ -27,23 +27,44 @@ const ProductImageGallery = ({ productId, primaryImage }: ProductImageGalleryPro
 
   const fetchProductImages = async () => {
     try {
-      // Since product_images table doesn't exist, use placeholder images
-      setImages([{
-        id: 'primary',
-        image_url: primaryImage,
-        alt_text: 'Product image',
-        sort_order: 0
-      }]);
+      // Try to load active preview images from Supabase
+      const { data, error } = await supabase
+        .from('preview_images')
+        .select('id, image_url, alt_text, sort_order, created_at')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching preview images:', error);
+      }
+
+      if (data && data.length > 0) {
+        const mapped: ProductImage[] = data.map((d: any, idx: number) => ({
+          id: d.id,
+          image_url: d.image_url,
+          alt_text: d.alt_text ?? 'Frame preview',
+          sort_order: d.sort_order ?? idx,
+        }));
+        setImages(mapped);
+      } else {
+        // Fallback to primary image and local material textures
+        setImages([
+          { id: 'primary', image_url: primaryImage, alt_text: 'Product image', sort_order: 0 },
+          { id: 'mat-black', image_url: '/materials/black_wood_thick_1x1.png', alt_text: 'Black wood texture preview', sort_order: 1 },
+          { id: 'mat-brown', image_url: '/materials/brown_wood_thick_1x1.png', alt_text: 'Brown wood texture preview', sort_order: 2 },
+        ]);
+      }
     } catch (error) {
       console.error('Error fetching product images:', error);
-      // Fallback to primary image
-      setImages([{
-        id: 'primary',
-        image_url: primaryImage,
-        alt_text: 'Product image',
-        sort_order: 0
-      }]);
+      // Fallback to primary image and local material textures
+      setImages([
+        { id: 'primary', image_url: primaryImage, alt_text: 'Product image', sort_order: 0 },
+        { id: 'mat-black', image_url: '/materials/black_wood_thick_1x1.png', alt_text: 'Black wood texture preview', sort_order: 1 },
+        { id: 'mat-brown', image_url: '/materials/brown_wood_thick_1x1.png', alt_text: 'Brown wood texture preview', sort_order: 2 },
+      ]);
     } finally {
+      setSelectedImageIndex(0);
       setLoading(false);
     }
   };
@@ -122,6 +143,8 @@ const ProductImageGallery = ({ productId, primaryImage }: ProductImageGalleryPro
               <img
                 src={image.image_url}
                 alt={image.alt_text || 'Product thumbnail'}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </button>

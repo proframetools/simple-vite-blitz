@@ -45,6 +45,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [frameTexture, setFrameTexture] = useState<HTMLImageElement | null>(null);
 
   // Calculate photo area (inside frame and matting)
   const photoAreaLeft = frameWidth + mattingThickness;
@@ -153,6 +154,22 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     }
   }, [photoUrl, frameWidth, mattingThickness]);
 
+  // Load frame texture if frameColor points to a material image
+  useEffect(() => {
+    if (frameColor && frameColor.startsWith('/materials/')) {
+      const img = new Image();
+      img.onload = () => {
+        setFrameTexture(img);
+      };
+      img.onerror = () => {
+        setFrameTexture(null);
+      };
+      img.src = frameColor;
+    } else {
+      setFrameTexture(null);
+    }
+  }, [frameColor]);
+
   // Draw the frame preview
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -165,7 +182,16 @@ const FramePreview: React.FC<FramePreviewProps> = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // STEP 1: Draw frame base (foundation layer)
-    ctx.fillStyle = frameColor;
+    if (frameColor && frameColor.startsWith('/materials/') && frameTexture) {
+      const pattern = ctx.createPattern(frameTexture, 'repeat');
+      if (pattern) {
+        ctx.fillStyle = pattern;
+      } else {
+        ctx.fillStyle = frameColor;
+      }
+    } else {
+      ctx.fillStyle = frameColor;
+    }
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     
     // STEP 2: Draw frame opening (cut out inner area)
@@ -240,7 +266,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({
       ctx.setLineDash([]);
     }
     
-  }, [imageLoaded, photoPosition, frameColor, frameWidth, mattingColor, mattingThickness, photoUrl, imageError, photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight]);
+  }, [imageLoaded, photoPosition, frameColor, frameTexture, frameWidth, mattingColor, mattingThickness, photoUrl, imageError, photoAreaLeft, photoAreaTop, photoAreaWidth, photoAreaHeight]);
 
   // Mouse event handlers for dragging
   const handleMouseDown = (e: React.MouseEvent) => {
